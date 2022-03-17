@@ -52,6 +52,7 @@ def main():
                 location = pygame.mouse.get_pos() # get x,y pos
                 col = location[0] // SQ_SIZE
                 row = location[1] // SQ_SIZE
+
                 if squareSelected != (row, col):
                     squareSelected = (row, col)
                     playerClicks.append(squareSelected)

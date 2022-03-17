@@ -26,26 +26,24 @@ class GameState():
     def makeMove(self, move):
         # check the color of the current player
         if self.checkPossibleColor(move):
-            # if it is the right color, check all possible moves
+            # check if there is a check
+            isThereACheck = False
             possible_moves = self.getPossibleMoves()
+
             # check if the specific move is legal
             if self.isMoveLegal(move, possible_moves):
-
-                check_white = self.checkWhite(possible_moves)
-                check_black = self.checkBlack(possible_moves)
-
-                # check the opponent color
-                if self.whiteToMove:
-                    opponentColor = "b"
-                else:
-                    opponentColor = "w"
-
                 endPoint = self.board[move.endRow][move.endCol]
                 startPoint = self.board[move.startRow][move.startCol]
 
+                # check the opponent color
+                if self.whiteToMove:
+                    opponent_color = "b"
+                else:
+                    opponent_color = "w"
+
                 # check if the king move is legal (the square is not threaded)
                 if startPoint[1] == "K":
-                    if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponentColor):
+                    if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponent_color):
                         return
 
                 else:
@@ -53,6 +51,13 @@ class GameState():
 
                 self.board[move.endRow][move.endCol] = startPoint
                 self.board[move.startRow][move.startCol] = "--"
+
+                opposite_possible_moves = self.getOppositePossibleMoves()
+                if self.checkExist(opposite_possible_moves):
+                    self.board[move.startRow][move.startCol] = startPoint
+                    self.board[move.endRow][move.endCol] = endPoint
+                    print("illegal")
+                    return
 
             elif self.castling(move):
                 endPoint = self.board[move.endRow][move.endCol]
@@ -82,23 +87,23 @@ class GameState():
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
 
-    def checkWhite(self, moves):
-        for checkMove in moves:
-            if self.board[checkMove.startRow][checkMove.startCol][0] == "b" and \
-                    self.board[checkMove.endRow][checkMove.endCol] == "wK" and \
-                    self.board[checkMove.startRow][checkMove.startCol][1] != "P":
-                print("check")
-                return True
-        return False
+    def checkExist(self, opposite_moves):
+        if self.whiteToMove:
+            for checkMove in opposite_moves:
+                if self.board[checkMove.startRow][checkMove.startCol][0] == "b" and \
+                        self.board[checkMove.endRow][checkMove.endCol] == "wK" and \
+                        self.board[checkMove.startRow][checkMove.startCol][1] != "P":
+                    return True
+            return False
 
-    def checkBlack(self, moves):
-        for checkMove in moves:
-            if self.board[checkMove.startRow][checkMove.startCol][0] == "w" and \
-                    self.board[checkMove.endRow][checkMove.endCol] == "bK" and \
-                    self.board[checkMove.startRow][checkMove.startCol][1] != "P":
-                print("check")
-                return True
-        return False
+        else:
+            for checkMove in opposite_moves:
+                if self.board[checkMove.startRow][checkMove.startCol][0] == "w" and \
+                        self.board[checkMove.endRow][checkMove.endCol] == "bK" and \
+                        self.board[checkMove.startRow][checkMove.startCol][1] != "P":
+                    print("check")
+                    return True
+            return False
 
     def updateRockMoves(self, move):
         pass
@@ -173,6 +178,14 @@ class GameState():
         if not self.whiteToMove and self.board[move.startRow][move.startCol][0] == 'b':
             return True
         return False
+
+    def getOppositePossibleMoves(self):
+        self.whiteToMove = not self.whiteToMove  # swap players move
+        oppositeMoves = self.getPossibleMoves()
+        self.whiteToMove = not self.whiteToMove  # swap players move
+        return oppositeMoves
+
+
 
 # get all possible moves in a list
     def getPossibleMoves(self):

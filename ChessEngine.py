@@ -13,8 +13,6 @@ class GameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
-
-
         ]
         self.whiteToMove = True
         self.moveLog = []
@@ -32,10 +30,11 @@ class GameState():
             possible_moves = self.getPossibleMoves()
             # check if the specific move is legal
             if self.isMoveLegal(move, possible_moves):
-                # check the opponent color
-                self.checkWhite(possible_moves)
-                self.checkBlack(possible_moves)
 
+                check_white = self.checkWhite(possible_moves)
+                check_black = self.checkBlack(possible_moves)
+
+                # check the opponent color
                 if self.whiteToMove:
                     opponentColor = "b"
                 else:
@@ -75,6 +74,9 @@ class GameState():
                 self.updateRockMoves(move)
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
+
+            # check promotion
+            self.promotion()
 
             # print move
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
@@ -485,7 +487,7 @@ class GameState():
             if self.board[r][col + 1] == "--":
                 moves.append(Move((r, c), (r, col + 1)))
                 col += 1
-            elif self.board[r][c + 1][0] == opponent_color:
+            elif self.board[r][col + 1][0] == opponent_color:
                 moves.append(Move((r, c), (r, col + 1)))
                 break
             else:
@@ -512,3 +514,43 @@ class GameState():
                 moves.append(Move((r, c), (r + 1, c - 1)))
             if r + 1 <= 7 and c + 1 <= 7 and self.board[r + 1][c + 1][0] == "w":
                 moves.append(Move((r, c), (r + 1, c + 1)))
+
+    def promotion(self):
+        for i in range(len(self.board)):
+            if self.board[0][i] == "wP":
+                new_piece = input("""
+                Choose your new piece: 
+                 1 - for Queen  
+                 2 - for Rock 
+                 3 - for Bishop 
+                 4 - for knight 
+                 """)
+
+                if new_piece == "1":
+                    self.board[0][i] = "wQ"
+                elif new_piece == "2":
+                    self.board[0][i] = "wR"
+                elif new_piece == "3":
+                    self.board[0][i] = "wB"
+                elif new_piece == "4":
+                    self.board[0][i] = "wN"
+                return
+
+            elif self.board[7][i] == "bP":
+                new_piece = input("""
+                Choose your new piece: 
+                1 - for Queen  
+                2 - for Rock  
+                3 - for Bishop 
+                4 - for knight 
+                """)
+                if new_piece == "1":
+                    self.board[7][i] = "bQ"
+                elif new_piece == "2":
+                    self.board[7][i] = "bR"
+                elif new_piece == "3":
+                    self.board[7][i] = "bB"
+                elif new_piece == "4":
+                    self.board[7][i] = "bN"
+                return
+

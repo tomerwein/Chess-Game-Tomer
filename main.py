@@ -72,6 +72,7 @@ def main():
                 if e.key == pygame.K_RIGHT:
                     gs.redoMove()
 
+
         drawGameState(screen, gs.board)
         clock.tick(FPS)
         pygame.display.flip()

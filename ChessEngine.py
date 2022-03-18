@@ -27,8 +27,13 @@ class GameState():
         # check the color of the current player
         if self.checkPossibleColor(move):
             # check if there is a check
-            isThereACheck = False
+
             possible_moves = self.getPossibleMoves()
+            print(len(possible_moves))
+
+            if len(possible_moves) < 10:
+                for move in possible_moves:
+                    self.printMove(move)
 
             # check if the specific move is legal
             if self.isMoveLegal(move, possible_moves):
@@ -36,28 +41,31 @@ class GameState():
                 startPoint = self.board[move.startRow][move.startCol]
 
                 # check the opponent color
-                if self.whiteToMove:
-                    opponent_color = "b"
-                else:
-                    opponent_color = "w"
+                # if self.whiteToMove:
+                #     opponent_color = "b"
+                # else:
+                #     opponent_color = "w"
 
                 # check if the king move is legal (the square is not threaded)
-                if startPoint[1] == "K":
-                    if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponent_color):
-                        return
-
-                else:
-                    '''check if the king is threaded while other pieces move'''
+                # if startPoint[1] == "K":
+                #     if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponent_color):
+                #         return
 
                 self.board[move.endRow][move.endCol] = startPoint
                 self.board[move.startRow][move.startCol] = "--"
 
+                # check if still there is a check
                 opposite_possible_moves = self.getOppositePossibleMoves()
                 if self.checkExist(opposite_possible_moves):
                     self.board[move.startRow][move.startCol] = startPoint
                     self.board[move.endRow][move.endCol] = endPoint
                     print("illegal")
                     return
+
+                    # check if a rock moved
+                if startPoint == "wR" or \
+                        startPoint == "bR":
+                    self.updateRockMoves(move)
 
             elif self.castling(move):
                 endPoint = self.board[move.endRow][move.endCol]
@@ -73,10 +81,6 @@ class GameState():
                     self.moveLog.pop()
                 self.moveLog.append([move, endPoint])
 
-            # check if a rock moved
-            if self.board[move.endRow][move.endCol] == "wR" and \
-                    self.board[move.endRow][move.endCol] == "bR":
-                self.updateRockMoves(move)
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
 
@@ -86,6 +90,10 @@ class GameState():
             # print move
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
+
+    def printMove(self, move):
+        print("start move: " + str(move.startRow) + ":" + str(move.startCol))
+        print("end move: " + str(move.endRow) + ":" + str(move.endCol))
 
     def checkExist(self, opposite_moves):
         if self.whiteToMove:
@@ -106,7 +114,15 @@ class GameState():
             return False
 
     def updateRockMoves(self, move):
-        pass
+        r, c = move.startRow, move.startCol
+        if r == 0 and c == 0:
+            self.blackLeftRockMoved = True
+        elif r == 0 and c == 7:
+            self.blackRightRockMoved = True
+        elif r == 7 and c == 0:
+            self.whiteLeftRockMoved = True
+        elif r == 7 and c == 7:
+            self.whiteRightRockMoved = True
 
     def isMoveLegal(self, move, possible_moves):
         for checkMove in possible_moves:
@@ -185,26 +201,43 @@ class GameState():
         self.whiteToMove = not self.whiteToMove  # swap players move
         return oppositeMoves
 
-
-
 # get all possible moves in a list
     def getPossibleMoves(self):
         possibleMoves = []
-        for r in range(len(self.board)):
-            for c in range(len(self.board)):
-                if self.board[r][c][1] == "P":
-                    self.getPawnMoves(r, c, possibleMoves)
-                elif self.board[r][c][1] == "R":
-                    self.getRockMoves(r, c, possibleMoves)
-                elif self.board[r][c][1] == "B":
-                    self.getBishopMoves(r, c, possibleMoves)
-                elif self.board[r][c][1] == "N":
-                    self.getKnightMoves(r, c, possibleMoves)
-                elif self.board[r][c][1] == "Q":
-                    self.getRockMoves(r, c, possibleMoves)
-                    self.getBishopMoves(r, c, possibleMoves)
-                elif self.board[r][c][1] == "K":
-                    self.getKingMoves(r, c, possibleMoves)
+        if self.whiteToMove:
+            for r in range(len(self.board)):
+                for c in range(len(self.board)):
+                    if self.board[r][c][0] == "w":
+                        if self.board[r][c][1] == "P":
+                            self.getPawnMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "R":
+                            self.getRockMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "B":
+                            self.getBishopMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "N":
+                            self.getKnightMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "Q":
+                            self.getRockMoves(r, c, possibleMoves)
+                            self.getBishopMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "K":
+                            self.getKingMoves(r, c, possibleMoves)
+        else:
+            for r in range(len(self.board)):
+                for c in range(len(self.board)):
+                    if self.board[r][c][0] == "b":
+                        if self.board[r][c][1] == "P":
+                            self.getPawnMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "R":
+                            self.getRockMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "B":
+                            self.getBishopMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "N":
+                            self.getKnightMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "Q":
+                            self.getRockMoves(r, c, possibleMoves)
+                            self.getBishopMoves(r, c, possibleMoves)
+                        elif self.board[r][c][1] == "K":
+                            self.getKingMoves(r, c, possibleMoves)
 
         return possibleMoves
 
@@ -239,7 +272,7 @@ class GameState():
         if not self.blackKingMoved:
             # check black right castling
             if move.startRow == 0 and move.startCol == 4 and move.endRow == 0 and \
-                    move.endCol == 6 and not self.whiteRightRockMoved and \
+                    move.endCol == 6 and not self.blackRightRockMoved and \
                     self.board[0][5] == "--" and self.board[0][6] == "--":
                 self.board[0][4] = "--"
                 self.board[0][5] = "bR"
@@ -250,7 +283,7 @@ class GameState():
 
             # check black left castling
             if move.startRow == 0 and move.startCol == 4 and move.endRow == 0 and \
-                    move.endCol == 2 and not self.whiteLeftRockMoved and \
+                    move.endCol == 2 and not self.blackLeftRockMoved and \
                     self.board[0][1] == "--" and self.board[0][2] == "--" and \
                     self.board[0][3] == "--":
                 self.board[0][0] = "--"

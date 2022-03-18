@@ -29,6 +29,8 @@ class GameState():
             # check if there is a check
 
             possible_moves = self.getPossibleMoves()
+            opposite_moves =self.getOppositePossibleMoves()
+            self.removeIllegalKingMoves(possible_moves, opposite_moves)
             print(len(possible_moves))
 
             if len(possible_moves) < 10:
@@ -201,7 +203,7 @@ class GameState():
         self.whiteToMove = not self.whiteToMove  # swap players move
         return oppositeMoves
 
-# get all possible moves in a list
+    # get all possible moves in a list
     def getPossibleMoves(self):
         possibleMoves = []
         if self.whiteToMove:
@@ -221,6 +223,7 @@ class GameState():
                             self.getBishopMoves(r, c, possibleMoves)
                         elif self.board[r][c][1] == "K":
                             self.getKingMoves(r, c, possibleMoves)
+
         else:
             for r in range(len(self.board)):
                 for c in range(len(self.board)):
@@ -241,7 +244,7 @@ class GameState():
 
         return possibleMoves
 
-# check if the move is castling and if it's legal
+    # check if the move is castling and if it's legal
     def castling(self, move):
         # check if the white king has moved
         if not self.whiteKingMoved:
@@ -293,25 +296,41 @@ class GameState():
                 self.blackKingMoved = True
                 return True
 
-# if king moves, check if the move is legal
-    def checkIfKingMovellegal(self, r, c, moves, opponent_color):
+    # if king moves, check if the move is legal
+    def removeIllegalKingMoves(self, moves, opposite_moves):
+        illegalIndexesList = []
+        print("wow")
+        for index, move in enumerate(moves):
+            if self.board[move.startRow][move.startCol][1] == "K" and \
+                    self.checkIfKingMovellegal(move.endRow, move.endCol, opposite_moves):
+                illegalIndexesList.append(move)
+
+        for illegalMove in illegalIndexesList:
+            moves.remove(illegalMove)
+
+    def checkIfKingMovellegal(self, r, c, opposite_moves):
         # Check if there is a pawn that threat that square
+        if self.whiteToMove:
+            opponent_color = "b"
+        else:
+            opponent_color = "w"
+
         if opponent_color == "w":
-            if r+1 < len(self.board) and c+1 < len(self.board) and \
-                    self.board[r+1][c+1] == "wP":
+            if r + 1 < len(self.board) and c + 1 < len(self.board) and \
+                    self.board[r + 1][c + 1] == "wP":
                 return True
-            elif r+1 < len(self.board) and c-1 >= 0 and self.board[r+1][c-1] == "wP":
+            elif r + 1 < len(self.board) and c - 1 >= 0 and self.board[r + 1][c - 1] == "wP":
                 return True
 
         else:
-            if r-1 > 0 and c+1 < len(self.board) and \
+            if r - 1 > 0 and c + 1 < len(self.board) and \
                     self.board[r - 1][c + 1] == "bP":
                 return True
-            elif r-1 > 0 and c-1 >= 0 and self.board[r - 1][c - 1] == "bP":
+            elif r - 1 > 0 and c - 1 >= 0 and self.board[r - 1][c - 1] == "bP":
                 return True
 
         # Check if there is an opponent move that hits the king's square
-        for checkMove in moves:
+        for checkMove in opposite_moves:
             if checkMove.endRow == r and \
                     checkMove.endCol == c and \
                     self.board[checkMove.startRow][checkMove.startCol][0] == opponent_color and \
@@ -599,4 +618,3 @@ class GameState():
                 elif new_piece == "4":
                     self.board[7][i] = "bN"
                 return
-

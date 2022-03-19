@@ -22,6 +22,8 @@ class GameState():
         self.whiteKingMoved, self.blackKingMoved = False, False
         self.whiteRightRockMoved, self.whiteLeftRockMoved = False, False
         self.blackRightRockMoved, self.blackLeftRockMoved = False, False
+        self.countPieces = 32
+        self.countTurnsNoEat = 0
 
     def makeMove(self, move):
         # check the color of the current player
@@ -47,7 +49,7 @@ class GameState():
                 # else:
                 #     opponent_color = "w"
 
-                # check if the king move is legal (the square is not threaded)
+                # check if the king move is legal (the square is not eaded)
                 # if startPoint[1] == "K":
                 #     if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponent_color):
                 #         return
@@ -93,11 +95,36 @@ class GameState():
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
 
             opposite_moves = self.getOppositePossibleMoves()
+            possible_moves = self.getPossibleMoves()
+            self.removeIllegalKingMoves(possible_moves, opposite_moves)
+            print("possible moves: " + str(len(possible_moves)))
             if self.checkExist(opposite_moves):
                 print("check")
-                if self.mateExist(possible_moves, opposite_moves):
-                    print("check-mate")
-                    pass
+                # if self.mateExist(possible_moves, opposite_moves):
+                #     print("check-mate")
+                #     pass
+
+            elif len(possible_moves) == 0:
+                print("Pat2")
+
+            if len(self.moveLog) > 10 and self.checkThreeFoldRepetition():
+                print("Pat")
+
+    def checkThreeFoldRepetition(self):
+        move_one, move_two, countReptition = self.moveLog[-1][0], self.moveLog[-2][0], 1
+        start = self.board[move_one.endRow][move_one.endCol]
+        end = self.board[move_one.endRow][move_one.endCol]
+
+        for repeat in range(1,3):
+            move_one, move_two = self.moveLog[-1-repeat*4][0], self.moveLog[-2-repeat*4][0]
+            if start == self.board[move_one.endRow][move_one.endCol] and \
+                end == self.board[move_one.endRow][move_one.endCol]:
+                countReptition += 1
+
+        print(countReptition)
+        if countReptition == 3:
+            return True
+        return False
 
     def mateExist(self, moves, opp_moves):
         self.removeIllegalKingMoves(moves, opp_moves)

@@ -29,13 +29,12 @@ class GameState():
             # check if there is a check
 
             possible_moves = self.getPossibleMoves()
-            opposite_moves =self.getOppositePossibleMoves()
+            opposite_moves = self.getOppositePossibleMoves()
             self.removeIllegalKingMoves(possible_moves, opposite_moves)
             print(len(possible_moves))
-
-            if len(possible_moves) < 10:
-                for move in possible_moves:
-                    self.printMove(move)
+            if len(possible_moves) == 1:
+                print(str(possible_moves[0].startRow) + str(possible_moves[0].startCol))
+                print(str(possible_moves[0].endRow) + str(possible_moves[0].endRow))
 
             # check if the specific move is legal
             if self.isMoveLegal(move, possible_moves):
@@ -93,9 +92,33 @@ class GameState():
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
 
-    def printMove(self, move):
-        print("start move: " + str(move.startRow) + ":" + str(move.startCol))
-        print("end move: " + str(move.endRow) + ":" + str(move.endCol))
+            opposite_moves = self.getOppositePossibleMoves()
+            if self.checkExist(opposite_moves):
+                print("check")
+                if self.mateExist(possible_moves, opposite_moves):
+                    print("check-mate")
+                    pass
+
+    def mateExist(self, moves, opp_moves):
+        self.removeIllegalKingMoves(moves, opp_moves)
+
+        for i in range(len(moves)-1, -1, -1):
+            bol = False
+            startMove = self.board[moves[i].startRow][moves[i].startCol]
+            endMove = self.board[moves[i].endRow][moves[i].endCol]
+            self.board[moves[i].startRow][moves[i].startCol] = "--"
+            self.board[moves[i].endRow][moves[i].endCol] = startMove
+
+            if self.checkExist(opp_moves):
+                bol = True
+
+            self.board[moves[i].startRow][moves[i].startCol] = startMove
+            self.board[moves[i].endRow][moves[i].endCol] = endMove
+
+            if bol:
+                moves.remove(moves[i])
+
+        print("len of moves " + str(len(moves)))
 
     def checkExist(self, opposite_moves):
         if self.whiteToMove:
@@ -299,14 +322,16 @@ class GameState():
     # if king moves, check if the move is legal
     def removeIllegalKingMoves(self, moves, opposite_moves):
         illegalIndexesList = []
-        print("wow")
-        for index, move in enumerate(moves):
+        for move in moves:
             if self.board[move.startRow][move.startCol][1] == "K" and \
                     self.checkIfKingMovellegal(move.endRow, move.endCol, opposite_moves):
                 illegalIndexesList.append(move)
 
+        # print(illegalIndexesList)
+        # print("len before" + str(len((moves))))
         for illegalMove in illegalIndexesList:
             moves.remove(illegalMove)
+        # print("len after" + str(len(moves)))
 
     def checkIfKingMovellegal(self, r, c, opposite_moves):
         # Check if there is a pawn that threat that square

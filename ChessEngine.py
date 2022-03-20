@@ -23,7 +23,7 @@ class GameState():
         self.whiteRightRockMoved, self.whiteLeftRockMoved = False, False
         self.blackRightRockMoved, self.blackLeftRockMoved = False, False
         self.countPieces = 32
-        self.countTurnsNoEat = 0
+        self.turnsNoEatNoMovePawn = 0
 
     def makeMove(self, move):
         # check the color of the current player
@@ -98,27 +98,81 @@ class GameState():
             possible_moves = self.getPossibleMoves()
             self.removeIllegalKingMoves(possible_moves, opposite_moves)
             print("possible moves: " + str(len(possible_moves)))
+            # check if there is a check-mate
             if self.checkExist(opposite_moves):
                 print("check")
                 # if self.mateExist(possible_moves, opposite_moves):
                 #     print("check-mate")
                 #     pass
 
+            # check if there is a stalemate
             elif len(possible_moves) == 0:
+                print("Pat1")
+
+            # check if there is a pat of three-fold repetition
+            if len(self.moveLog) > 10 and self.checkThreeFoldRepetition():
                 print("Pat2")
 
-            if len(self.moveLog) > 10 and self.checkThreeFoldRepetition():
-                print("Pat")
+            elif self.insufficientMaterial():
+                print("Pat3")
+
+            if self.checkFiftyMovesRule():
+                print("Pat4")
+
+    def checkFiftyMovesRule(self):
+        countEmptySquares = 0
+        lastMove = self.moveLog[-1][0]
+        for r in range(8):
+            for c in range(8):
+                if self.board[r][c] == "--":
+                    countEmptySquares += 1
+
+        if countEmptySquares != self.countPieces:
+            self.countPieces = countEmptySquares
+            self.turnsNoEatNoMovePawn = 0
+
+        else:
+            if self.board[lastMove.endRow][lastMove.endCol] != "wP" and \
+                    self.board[lastMove.endRow][lastMove.endCol] != "bP":
+                self.turnsNoEatNoMovePawn += 1
+                if self.turnsNoEatNoMovePawn == 100:
+                    return True
+            else:
+                self.turnsNoEatNoMovePawn = 0
+
+        print("turns no move, no eat" + str(self.turnsNoEatNoMovePawn))
+
+        return False
+
+    def insufficientMaterial(self):
+        countEmptySqaures, activeSquares = 0, {}
+        for r in range(8):
+            for c in range(8):
+                if self.board[r][c] != "--":
+                    activeSquares[self.board[r][c]] = r + c
+
+        if len(activeSquares) == 2:
+            return True
+
+        elif len(activeSquares) == 3 and ("bB" in activeSquares or "wB" in activeSquares or
+                                          "bN" in activeSquares or "wN" in activeSquares):
+            return True
+
+        elif len(activeSquares) == 4 and "bB" in activeSquares and "wB" in activeSquares and \
+                activeSquares["bB"] % 2 == activeSquares["wB"] % 2:
+            return True
+
+        return False
 
     def checkThreeFoldRepetition(self):
         move_one, move_two, countReptition = self.moveLog[-1][0], self.moveLog[-2][0], 1
         start = self.board[move_one.endRow][move_one.endCol]
         end = self.board[move_one.endRow][move_one.endCol]
 
-        for repeat in range(1,3):
-            move_one, move_two = self.moveLog[-1-repeat*4][0], self.moveLog[-2-repeat*4][0]
+        for repeat in range(1, 3):
+            move_one, move_two = self.moveLog[-1 - repeat * 4][0], self.moveLog[-2 - repeat * 4][0]
             if start == self.board[move_one.endRow][move_one.endCol] and \
-                end == self.board[move_one.endRow][move_one.endCol]:
+                    end == self.board[move_one.endRow][move_one.endCol]:
                 countReptition += 1
 
         print(countReptition)
@@ -129,7 +183,7 @@ class GameState():
     def mateExist(self, moves, opp_moves):
         self.removeIllegalKingMoves(moves, opp_moves)
 
-        for i in range(len(moves)-1, -1, -1):
+        for i in range(len(moves) - 1, -1, -1):
             bol = False
             startMove = self.board[moves[i].startRow][moves[i].startCol]
             endMove = self.board[moves[i].endRow][moves[i].endCol]

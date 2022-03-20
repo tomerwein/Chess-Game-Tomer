@@ -40,6 +40,8 @@ class GameState():
 
             # check if the specific move is legal
             if self.isMoveLegal(move, possible_moves):
+                if self.moveSpecial(move):
+                    pass
                 endPoint = self.board[move.endRow][move.endCol]
                 startPoint = self.board[move.startRow][move.startCol]
 
@@ -118,6 +120,18 @@ class GameState():
 
             if self.checkFiftyMovesRule():
                 print("Pat4")
+
+    def moveSpecial(self, move):
+        if self.whiteToMove:
+            if self.board[move.startRow][move.startCol] == "wP" and \
+                    self.board[move.endRow][move.endCol] == "--":
+                print("ok")
+                if move.startRow + 1 == move.endRow and move.startCol + 1 == move.endCol:
+                    self.board[move.startRow][move.startCol + 1] = "--"
+                elif move.startRow + 1 == move.endRow and move.startCol - 1 == move.endCol:
+                    self.board[move.startRow][move.startCol - 1] = "--"
+
+        return True
 
     def checkFiftyMovesRule(self):
         countEmptySquares = 0
@@ -667,6 +681,18 @@ class GameState():
     def getPawnMoves(self, r, c, moves):
         # white to move
         if self.whiteToMove:
+            if len(self.moveLog) > 1 and r == 3:
+                lastMove = self.moveLog[self.index][0]
+                if c - 1 >= 0 and self.board[3][c - 1] == "bP" and \
+                        lastMove.startRow == 1 and \
+                        lastMove.endRow == 3 and lastMove.endCol == c - 1:
+                    moves.append(Move((r, c), (r - 1, c - 1)))
+
+                if c + 1 < len(self.board) and \
+                        self.board[3][c + 1] == "bP" and lastMove.startRow == 1 and \
+                        lastMove.endRow == 3 and lastMove.endCol == c + 1:
+                    moves.append(Move((r, c), (r - 1, c + 1)))
+
             if r - 1 >= 0 and self.board[r - 1][c] == "--":
                 moves.append(Move((r, c), (r - 1, c)))
             if r == 6 and self.board[r - 2][c] == "--":

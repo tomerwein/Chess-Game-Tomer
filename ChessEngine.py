@@ -27,6 +27,7 @@ class GameState():
 
     def makeMove(self, move):
         # check the color of the current player
+
         if self.checkPossibleColor(move):
             # check if there is a check
 
@@ -39,22 +40,12 @@ class GameState():
                 print(str(possible_moves[0].endRow) + str(possible_moves[0].endRow))
 
             # check if the specific move is legal
+            specialMove = False
             if self.isMoveLegal(move, possible_moves):
                 if self.moveSpecial(move):
-                    pass
+                    specialMove = True
                 endPoint = self.board[move.endRow][move.endCol]
                 startPoint = self.board[move.startRow][move.startCol]
-
-                # check the opponent color
-                # if self.whiteToMove:
-                #     opponent_color = "b"
-                # else:
-                #     opponent_color = "w"
-
-                # check if the king move is legal (the square is not eaded)
-                # if startPoint[1] == "K":
-                #     if self.checkIfKingMovellegal(move.endRow, move.endCol, possible_moves, opponent_color):
-                #         return
 
                 self.board[move.endRow][move.endCol] = startPoint
                 self.board[move.startRow][move.startCol] = "--"
@@ -79,12 +70,13 @@ class GameState():
                 return
 
             # if move legal, add the move to the moveLog (saves all the moves that had been done)
+
             if self.index == len(self.moveLog) - 1:
-                self.moveLog.append([move, endPoint])
+                self.moveLog.append([move, endPoint, specialMove])
             else:
                 while self.index != len(self.moveLog) - 1:
                     self.moveLog.pop()
-                self.moveLog.append([move, endPoint])
+                self.moveLog.append([move, endPoint, specialMove])
 
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
@@ -123,15 +115,27 @@ class GameState():
 
     def moveSpecial(self, move):
         if self.whiteToMove:
-            if self.board[move.startRow][move.startCol] == "wP" and \
+            if move.startRow == 3 and self.board[move.startRow][move.startCol] == "wP" and \
+                    self.board[move.endRow][move.endCol] == "--":
+                print("ok")
+                if move.startRow - 1 == move.endRow and move.startCol + 1 == move.endCol:
+                    self.board[move.startRow][move.startCol + 1] = "--"
+                    return True
+                elif move.startRow - 1 == move.endRow and move.startCol - 1 == move.endCol:
+                    self.board[move.startRow][move.startCol - 1] = "--"
+                    return True
+        else:
+            if move.startRow == 4 and self.board[move.startRow][move.startCol] == "bP" and \
                     self.board[move.endRow][move.endCol] == "--":
                 print("ok")
                 if move.startRow + 1 == move.endRow and move.startCol + 1 == move.endCol:
                     self.board[move.startRow][move.startCol + 1] = "--"
+                    return True
                 elif move.startRow + 1 == move.endRow and move.startCol - 1 == move.endCol:
                     self.board[move.startRow][move.startCol - 1] = "--"
+                    return True
 
-        return True
+        return False
 
     def checkFiftyMovesRule(self):
         countEmptySquares = 0
@@ -273,6 +277,14 @@ class GameState():
 
             # Undo the rest of the cases
             else:
+                if move[2]:
+                    if self.whiteToMove:
+                        c = move[0].startCol - move[0].endCol
+                        self.board[move[0].startRow][move[0].startCol-c] = "wP"
+                    else:
+                        c = move[0].startCol - move[0].endCol
+                        self.board[move[0].startRow][move[0].startCol-c] = "bP"
+
                 self.board[move[0].startRow][move[0].startCol] = \
                     self.board[move[0].endRow][move[0].endCol]
                 self.board[move[0].endRow][move[0].endCol] = move[1]
@@ -692,6 +704,18 @@ class GameState():
                         self.board[3][c + 1] == "bP" and lastMove.startRow == 1 and \
                         lastMove.endRow == 3 and lastMove.endCol == c + 1:
                     moves.append(Move((r, c), (r - 1, c + 1)))
+
+            if len(self.moveLog) > 1 and r == 4:
+                lastMove = self.moveLog[self.index][0]
+                if c + 1 < len(self.board) and self.board[3][c - 1] == "wP" and \
+                        lastMove.startRow == 6 and \
+                        lastMove.endRow == 4 and lastMove.endCol == c - 1:
+                    moves.append(Move((r, c), (r + 1, c - 1)))
+
+                if c + 1 < len(self.board) and \
+                        self.board[3][c + 1] == "wP" and lastMove.startRow == 6 and \
+                        lastMove.endRow == 4 and lastMove.endCol == c + 1:
+                    moves.append(Move((r, c), (r + 1, c + 1)))
 
             if r - 1 >= 0 and self.board[r - 1][c] == "--":
                 moves.append(Move((r, c), (r - 1, c)))

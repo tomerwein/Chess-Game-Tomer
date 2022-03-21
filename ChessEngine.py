@@ -33,7 +33,6 @@ class GameState():
 
             possible_moves = self.getPossibleMoves()
             opposite_moves = self.getOppositePossibleMoves()
-            self.removeIllegalKingMoves(possible_moves, opposite_moves)
             print(len(possible_moves))
             if len(possible_moves) == 1:
                 print(str(possible_moves[0].startRow) + str(possible_moves[0].startCol))
@@ -84,8 +83,6 @@ class GameState():
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
 
-
-
             # print move
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
@@ -93,13 +90,11 @@ class GameState():
             opposite_moves = self.getOppositePossibleMoves()
             possible_moves = self.getPossibleMoves()
             self.removeIllegalKingMoves(possible_moves, opposite_moves)
-            print("possible moves: " + str(len(possible_moves)))
+
             # check if there is a check-mate
             if self.checkExist(opposite_moves):
-                print("check")
-                # if self.mateExist(possible_moves, opposite_moves):
-                #     print("check-mate")
-                #     pass
+                if self.mateExist(possible_moves, opposite_moves):
+                    print("check-mate")
 
             # check if there is a stalemate
             elif len(possible_moves) == 0:
@@ -119,7 +114,6 @@ class GameState():
         if self.whiteToMove:
             if move.startRow == 3 and self.board[move.startRow][move.startCol] == "wP" and \
                     self.board[move.endRow][move.endCol] == "--":
-                print("ok")
                 if move.startRow - 1 == move.endRow and move.startCol + 1 == move.endCol:
                     self.board[move.startRow][move.startCol + 1] = "--"
                     return True
@@ -129,7 +123,6 @@ class GameState():
         else:
             if move.startRow == 4 and self.board[move.startRow][move.startCol] == "bP" and \
                     self.board[move.endRow][move.endCol] == "--":
-                print("ok")
                 if move.startRow + 1 == move.endRow and move.startCol + 1 == move.endCol:
                     self.board[move.startRow][move.startCol + 1] = "--"
                     return True
@@ -159,8 +152,6 @@ class GameState():
                     return True
             else:
                 self.turnsNoEatNoMovePawn = 0
-
-        print("turns no move, no eat" + str(self.turnsNoEatNoMovePawn))
 
         return False
 
@@ -201,17 +192,17 @@ class GameState():
         return False
 
     def mateExist(self, moves, opp_moves):
-        self.removeIllegalKingMoves(moves, opp_moves)
+        # self.removeIllegalKingMoves(moves, opp_moves)
 
         for i in range(len(moves) - 1, -1, -1):
-            bol = False
+            bol = True
             startMove = self.board[moves[i].startRow][moves[i].startCol]
             endMove = self.board[moves[i].endRow][moves[i].endCol]
             self.board[moves[i].startRow][moves[i].startCol] = "--"
             self.board[moves[i].endRow][moves[i].endCol] = startMove
 
-            if self.checkExist(opp_moves):
-                bol = True
+            if not self.checkExist(opp_moves):
+                bol = False
 
             self.board[moves[i].startRow][moves[i].startCol] = startMove
             self.board[moves[i].endRow][moves[i].endCol] = endMove
@@ -220,6 +211,13 @@ class GameState():
                 moves.remove(moves[i])
 
         print("len of moves " + str(len(moves)))
+        if len(moves) == 1:
+            print(str(moves[0].startRow)+str(moves[0].startCol))
+            print(str(moves[0].endRow) + str(moves[0].endCol))
+
+        if len(moves) == 0:
+            return True
+        return False
 
     def checkExist(self, opposite_moves):
         if self.whiteToMove:
@@ -233,7 +231,6 @@ class GameState():
             for checkMove in opposite_moves:
                 if self.board[checkMove.startRow][checkMove.startCol][0] == "w" and \
                         self.board[checkMove.endRow][checkMove.endCol] == "bK":
-                    print("check")
                     return True
             return False
 
@@ -535,7 +532,7 @@ class GameState():
             moves.append(Move((r, c), (r + 1, c)))
 
         # option 6
-        if r + 1 < len(self.board) - 1 and c + 1 < len(self.board) - 1 and \
+        if r + 1 < len(self.board) and c + 1 < len(self.board) and \
                 (self.board[r + 1][c + 1] == "--" or
                  self.board[r + 1][c + 1][0] == opponent_color):
             moves.append(Move((r, c), (r + 1, c + 1)))

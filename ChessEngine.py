@@ -225,16 +225,14 @@ class GameState():
         if self.whiteToMove:
             for checkMove in opposite_moves:
                 if self.board[checkMove.startRow][checkMove.startCol][0] == "b" and \
-                        self.board[checkMove.endRow][checkMove.endCol] == "wK" and \
-                        self.board[checkMove.startRow][checkMove.startCol][1] != "P":
+                        self.board[checkMove.endRow][checkMove.endCol] == "wK":
                     return True
             return False
 
         else:
             for checkMove in opposite_moves:
                 if self.board[checkMove.startRow][checkMove.startCol][0] == "w" and \
-                        self.board[checkMove.endRow][checkMove.endCol] == "bK" and \
-                        self.board[checkMove.startRow][checkMove.startCol][1] != "P":
+                        self.board[checkMove.endRow][checkMove.endCol] == "bK":
                     print("check")
                     return True
             return False

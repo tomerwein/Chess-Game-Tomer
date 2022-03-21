@@ -69,20 +69,22 @@ class GameState():
             else:
                 return
 
+                # check promotion
+            new_piece = self.promotion()
+
             # if move legal, add the move to the moveLog (saves all the moves that had been done)
 
             if self.index == len(self.moveLog) - 1:
-                self.moveLog.append([move, endPoint, specialMove])
+                self.moveLog.append([move, endPoint, specialMove, new_piece])
             else:
                 while self.index != len(self.moveLog) - 1:
                     self.moveLog.pop()
-                self.moveLog.append([move, endPoint, specialMove])
+                self.moveLog.append([move, endPoint, specialMove, new_piece])
 
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
 
-            # check promotion
-            self.promotion()
+
 
             # print move
             print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
@@ -290,6 +292,11 @@ class GameState():
                 self.board[move[0].endRow][move[0].endCol] = move[1]
                 self.whiteToMove = not self.whiteToMove  # swap players move
 
+                if move[3] != "0" and move[0].endRow == 0:
+                    self.board[move[0].startRow][move[0].startCol] = "wP"
+                elif move[3] != "0" and move[0].endRow == 7:
+                    self.board[move[0].startRow][move[0].startCol] = "bP"
+
             self.index -= 1
 
     def redoMove(self):
@@ -315,6 +322,28 @@ class GameState():
 
             # if redo move isn't castling
             else:
+                if move[2]:
+                    self.board[move[0].startRow][move[0].endCol] = "--"
+                elif move[3] != "0":
+                    if self.whiteToMove:
+                        if move[3] == "1":
+                            self.board[move[0].startRow][move[0].startCol] = "wQ"
+                        elif move[3] == "2":
+                            self.board[move[0].startRow][move[0].startCol] = "wR"
+                        elif move[3] == "3":
+                            self.board[move[0].startRow][move[0].startCol] = "wB"
+                        elif move[3] == "4":
+                            self.board[move[0].startRow][move[0].startCol] = "wN"
+                    else:
+                        if move[3] == "1":
+                            self.board[move[0].startRow][move[0].startCol] = "bQ"
+                        elif move[3] == "2":
+                            self.board[move[0].startRow][move[0].startCol] = "bR"
+                        elif move[3] == "3":
+                            self.board[move[0].startRow][move[0].startCol] = "bB"
+                        elif move[3] == "4":
+                            self.board[move[0].startRow][move[0].startCol] = "bN"
+
                 self.board[move[0].endRow][move[0].endCol] = \
                     self.board[move[0].startRow][move[0].startCol]
                 self.board[move[0].startRow][move[0].startCol] = "--"
@@ -705,18 +734,6 @@ class GameState():
                         lastMove.endRow == 3 and lastMove.endCol == c + 1:
                     moves.append(Move((r, c), (r - 1, c + 1)))
 
-            if len(self.moveLog) > 1 and r == 4:
-                lastMove = self.moveLog[self.index][0]
-                if c + 1 < len(self.board) and self.board[3][c - 1] == "wP" and \
-                        lastMove.startRow == 6 and \
-                        lastMove.endRow == 4 and lastMove.endCol == c - 1:
-                    moves.append(Move((r, c), (r + 1, c - 1)))
-
-                if c + 1 < len(self.board) and \
-                        self.board[3][c + 1] == "wP" and lastMove.startRow == 6 and \
-                        lastMove.endRow == 4 and lastMove.endCol == c + 1:
-                    moves.append(Move((r, c), (r + 1, c + 1)))
-
             if r - 1 >= 0 and self.board[r - 1][c] == "--":
                 moves.append(Move((r, c), (r - 1, c)))
             if r == 6 and self.board[r - 2][c] == "--":
@@ -727,6 +744,18 @@ class GameState():
                 moves.append(Move((r, c), (r - 1, c + 1)))
 
         else:
+            if len(self.moveLog) > 1 and r == 4:
+                lastMove = self.moveLog[self.index][0]
+                if c + 1 < len(self.board) and self.board[4][c - 1] == "wP" and \
+                        lastMove.startRow == 6 and \
+                        lastMove.endRow == 4 and lastMove.endCol == c - 1:
+                    moves.append(Move((r, c), (r + 1, c - 1)))
+
+                if c + 1 < len(self.board) and \
+                        self.board[4][c + 1] == "wP" and lastMove.startRow == 6 and \
+                        lastMove.endRow == 4 and lastMove.endCol == c + 1:
+                    moves.append(Move((r, c), (r + 1, c + 1)))
+
             if r + 1 <= 7 and self.board[r + 1][c] == "--":
                 moves.append(Move((r, c), (r + 1, c)))
             if r == 1 and self.board[r + 2][c] == "--":
@@ -737,6 +766,7 @@ class GameState():
                 moves.append(Move((r, c), (r + 1, c + 1)))
 
     def promotion(self):
+        new_piece = "0"
         for i in range(len(self.board)):
             if self.board[0][i] == "wP":
                 new_piece = input("""
@@ -755,7 +785,6 @@ class GameState():
                     self.board[0][i] = "wB"
                 elif new_piece == "4":
                     self.board[0][i] = "wN"
-                return
 
             elif self.board[7][i] == "bP":
                 new_piece = input("""
@@ -773,4 +802,6 @@ class GameState():
                     self.board[7][i] = "bB"
                 elif new_piece == "4":
                     self.board[7][i] = "bN"
-                return
+
+        return new_piece
+

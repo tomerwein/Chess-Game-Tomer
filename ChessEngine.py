@@ -89,7 +89,7 @@ class GameState():
 
             opposite_moves = self.getOppositePossibleMoves()
             possible_moves = self.getPossibleMoves()
-            self.removeIllegalKingMoves(possible_moves, opposite_moves)
+            # self.removeIllegalKingMoves(possible_moves, opposite_moves)
 
             # check if there is a check-mate
             if self.checkExist(opposite_moves):
@@ -211,11 +211,14 @@ class GameState():
                 moves.remove(moves[i])
 
         print("len of moves " + str(len(moves)))
+        isProtectedPiece = False
         if len(moves) == 1:
+            isProtectedPiece = self.isProtected(moves[0])
+            print(isProtectedPiece)
             print(str(moves[0].startRow)+str(moves[0].startCol))
             print(str(moves[0].endRow) + str(moves[0].endCol))
 
-        if len(moves) == 0:
+        if len(moves) == 0 or isProtectedPiece:
             return True
         return False
 
@@ -493,6 +496,23 @@ class GameState():
                     self.board[checkMove.startRow][checkMove.startRow][1] != "P":
                 return True
         return False
+
+    def isProtected(self, move):
+        protected = False
+        pieceChecked = self.board[move.endRow][move.endCol]
+        startPiece = self.board[move.startRow][move.startCol]
+        self.board[move.endRow][move.endCol] = startPiece
+        self.board[move.startRow][move.startCol] = "--"
+        oppositeMoves = self.getOppositePossibleMoves()
+        if self.checkExist(oppositeMoves):
+            protected = True
+
+        self.board[move.startRow][move.startCol] = startPiece
+        self.board[move.endRow][move.endCol] = pieceChecked
+
+        print("the piece is protected? " + str(protected))
+
+        return protected
 
     def getKingMoves(self, r, c, moves):
         # check the opponent color

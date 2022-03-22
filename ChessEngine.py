@@ -22,8 +22,10 @@ class GameState():
         self.whiteKingMoved, self.blackKingMoved = False, False
         self.whiteRightRockMoved, self.whiteLeftRockMoved = False, False
         self.blackRightRockMoved, self.blackLeftRockMoved = False, False
+        self.countTurns = 0
         self.countPieces = 32
         self.turnsNoEatNoMovePawn = 0
+        self.checkMate1 = False
 
     def makeMove(self, move):
         # check the color of the current player
@@ -80,11 +82,17 @@ class GameState():
                     self.moveLog.pop()
                 self.moveLog.append([move, endPoint, specialMove, new_piece])
 
+            currentColor = "b"
+            if self.whiteToMove:
+                self.countTurns += 1
+                currentColor = "w"
+
             self.index += 1
             self.whiteToMove = not self.whiteToMove  # swap players move
 
             # print move
-            print(self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
+            print(str(self.countTurns) + currentColor + ". " +
+                  self.realCols[move.startCol] + self.realRows[move.startRow] + ":" +
                   self.realCols[move.endCol] + self.realRows[move.endRow])  # print the move
 
             opposite_moves = self.getOppositePossibleMoves()
@@ -94,6 +102,7 @@ class GameState():
             # check if there is a check-mate
             if self.checkExist(opposite_moves):
                 if self.mateExist(possible_moves, opposite_moves):
+                    self.checkMate1 = True
                     print("check-mate")
 
             # check if there is a stalemate
@@ -215,7 +224,7 @@ class GameState():
         if len(moves) == 1:
             isProtectedPiece = self.isProtected(moves[0])
             print(isProtectedPiece)
-            print(str(moves[0].startRow)+str(moves[0].startCol))
+            print(str(moves[0].startRow) + str(moves[0].startCol))
             print(str(moves[0].endRow) + str(moves[0].endCol))
 
         if len(moves) == 0 or isProtectedPiece:
@@ -280,10 +289,10 @@ class GameState():
                 if move[2]:
                     if self.whiteToMove:
                         c = move[0].startCol - move[0].endCol
-                        self.board[move[0].startRow][move[0].startCol-c] = "wP"
+                        self.board[move[0].startRow][move[0].startCol - c] = "wP"
                     else:
                         c = move[0].startCol - move[0].endCol
-                        self.board[move[0].startRow][move[0].startCol-c] = "bP"
+                        self.board[move[0].startRow][move[0].startCol - c] = "bP"
 
                 self.board[move[0].startRow][move[0].startCol] = \
                     self.board[move[0].endRow][move[0].endCol]
@@ -820,3 +829,5 @@ class GameState():
 
         return new_piece
 
+    def checkMate(self):
+        return self.checkMate1

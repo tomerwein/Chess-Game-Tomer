@@ -73,6 +73,8 @@ def main():
                 if e.key == pygame.K_RIGHT:
                     gs.redoMove()
 
+        if gs.checkMate():
+            print("checkMate12")
 
         drawGameState(screen, gs.board)
         clock.tick(FPS)

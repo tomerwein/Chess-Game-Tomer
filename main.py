@@ -1,82 +1,129 @@
 import pygame
-
+from constants import *
 import ChessEngine
-from ChessEngine import *
-WIDTH = HEIGHT = 512
-DIMENSION = 8  #8X8 bored
-SQ_SIZE = HEIGHT // DIMENSION
-FPS = 15
-IMAGES = {}
+from Button import *
 
 def loadImages():
     #Pawns
-    IMAGES['wP'] = pygame.transform.scale(pygame.image.load("Images/wp.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['bP'] = pygame.transform.scale(pygame.image.load("Images/bp.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['wP'] = pygame.transform.scale(pygame.image.load("Images/game/wp.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['bP'] = pygame.transform.scale(pygame.image.load("Images/game/bp.png"), (SQ_SIZE, SQ_SIZE))
 
     #Rocks
-    IMAGES['bR'] = pygame.transform.scale(pygame.image.load("Images/bR.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['wR'] = pygame.transform.scale(pygame.image.load("Images/wR.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['bR'] = pygame.transform.scale(pygame.image.load("Images/game/bR.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['wR'] = pygame.transform.scale(pygame.image.load("Images/game/wR.png"), (SQ_SIZE, SQ_SIZE))
 
     #Bishops
-    IMAGES['bB'] = pygame.transform.scale(pygame.image.load("Images/bB.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['wB'] = pygame.transform.scale(pygame.image.load("Images/wB.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['bB'] = pygame.transform.scale(pygame.image.load("Images/game/bB.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['wB'] = pygame.transform.scale(pygame.image.load("Images/game/wB.png"), (SQ_SIZE, SQ_SIZE))
 
     #Knights
-    IMAGES['bN'] = pygame.transform.scale(pygame.image.load("Images/bN.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['wN'] = pygame.transform.scale(pygame.image.load("Images/wN.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['bN'] = pygame.transform.scale(pygame.image.load("Images/game/bN.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['wN'] = pygame.transform.scale(pygame.image.load("Images/game/wN.png"), (SQ_SIZE, SQ_SIZE))
 
     #Queens
-    IMAGES['bQ'] = pygame.transform.scale(pygame.image.load("Images/bQ.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['wQ'] = pygame.transform.scale(pygame.image.load("Images/wQ.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['bQ'] = pygame.transform.scale(pygame.image.load("Images/game/bQ.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['wQ'] = pygame.transform.scale(pygame.image.load("Images/game/wQ.png"), (SQ_SIZE, SQ_SIZE))
 
     #Kings
-    IMAGES['bK'] = pygame.transform.scale(pygame.image.load("Images/bK.png"), (SQ_SIZE,SQ_SIZE))
-    IMAGES['wK'] = pygame.transform.scale(pygame.image.load("Images/wK.png"), (SQ_SIZE,SQ_SIZE))
+    IMAGES['bK'] = pygame.transform.scale(pygame.image.load("Images/game/bK.png"), (SQ_SIZE, SQ_SIZE))
+    IMAGES['wK'] = pygame.transform.scale(pygame.image.load("Images/game/wK.png"), (SQ_SIZE, SQ_SIZE))
 
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# def get_font(size): # Returns Press-Start-2P in the desired size
+#     return pygame.font.Font(pygame.font.SysFont('chalkduster.ttf', 15), size)
+def get_font(size): # Returns Press-Start-2P in the desired size
+    return pygame.font.Font("Images/menu/font.ttf", size)
+
+def main_menu():
+    BG = pygame.image.load("Images/menu/Background.png")
+    running = True
+    while running:
+        screen.blit(BG, (0, 0))
+
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+        image_white = pygame.transform.scale(white, (125, 250))
+        image_black = pygame.transform.scale(black, (125, 250))
+        screen.blit(image_white, (0,140))
+        screen.blit(image_black, (390, 140))
+        MENU_TEXT = get_font(40).render("MAIN MENU", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(260, 100))
+
+        PLAY_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 200),
+                             text_input="PLAY",font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+        OPTIONS_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 300),
+                                text_input="OPTIONS", font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+        QUIT_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 400),
+                             text_input="QUIT", font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+
+        screen.blit(MENU_TEXT, MENU_RECT)
+
+        for button in [PLAY_BUTTON, OPTIONS_BUTTON, QUIT_BUTTON]:
+            button.changeColor(MENU_MOUSE_POS)
+            button.update(screen)
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    game()
+                # if OPTIONS_BUTTON.checkForInput(MENU_MOUSE_POS):
+                #     options()
+                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    running = False
+
+        pygame.display.update()
+
+def game():
+    squareSelected = () # No square is selected so far (row and a col)
+    playerClicks = [] # Move from sqaure 'a' to square 'b'
     clock = pygame.time.Clock()
     screen.fill(pygame.Color("white"))
     gs = ChessEngine.GameState()
-    loadImages() # load the Images only once
-    squareSelected = () # No square is selected so far (row and a col)
-    playerClicks = [] # Move from sqaure 'a' to square 'b'
     running = True
+    gameOn = True
     while running:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
 
-            if e.type == pygame.MOUSEBUTTONDOWN:
-                location = pygame.mouse.get_pos() # get x,y pos
-                col = location[0] // SQ_SIZE
-                row = location[1] // SQ_SIZE
+            if gameOn:
+                if e.type == pygame.MOUSEBUTTONDOWN:
+                    location = pygame.mouse.get_pos() # get x,y pos
+                    col = location[0] // SQ_SIZE
+                    row = location[1] // SQ_SIZE
 
-                if squareSelected != (row, col):
-                    squareSelected = (row, col)
-                    playerClicks.append(squareSelected)
+                    if squareSelected != (row, col):
+                        squareSelected = (row, col)
+                        playerClicks.append(squareSelected)
 
-                # if first click is on empty space
-                if len(playerClicks) == 1 and gs.board[row][col] == "--":
-                    playerClicks.pop()
+                    # if first click is on empty space
+                    if len(playerClicks) == 1 and gs.board[row][col] == "--":
+                        playerClicks.pop()
 
-                # if the player made his chosen move
-                if len(playerClicks) == 2:
-                    move = ChessEngine.Move(playerClicks[0],playerClicks[1])
-                    gs.makeMove(move)
-                    squareSelected, playerClicks = (), []
+                    # if the player made his chosen move
+                    if len(playerClicks) == 2:
+                        move = ChessEngine.Move(playerClicks[0],playerClicks[1])
+                        gs.makeMove(move)
+                        squareSelected, playerClicks = (), []
 
-            if e.type == pygame.KEYDOWN:
-                if e.key == pygame.K_LEFT:
-                    gs.undoMove()
-                if e.key == pygame.K_RIGHT:
-                    gs.redoMove()
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_LEFT:
+                        gs.undoMove()
+                    if e.key == pygame.K_RIGHT:
+                        gs.redoMove()
 
-        if gs.checkMate():
-            print("checkMate12")
+                if gameOn and gs.checkMate():
+                    gameOn = False
 
-        drawGameState(screen, gs.board)
+                drawGameState(screen, gs.board)
+
+            else:
+                drawGameState(screen, gs.board)
+                screen.blit(checkMate, (128,150))
+
+                if e.type == pygame.MOUSEBUTTONDOWN:
+                    location = pygame.mouse.get_pos() # get x,y pos
+
         clock.tick(FPS)
         pygame.display.flip()
 
@@ -101,5 +148,15 @@ def drawPieces(screen, board):
             if board[r][c] in IMAGES:
                 screen.blit(IMAGES[board[r][c]], pygame.Rect(c*SQ_SIZE-2, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
-if __name__ == '__main__':
-    main()
+WIDTH = HEIGHT = 512
+DIMENSION = 8  #8X8 board
+SQ_SIZE = HEIGHT // DIMENSION
+FPS = 15
+IMAGES = {}
+pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+loadImages()  # load the Images only once
+checkMate = pygame.image.load("Images/game/checkMate.jpg")
+white = pygame.image.load("Images/menu/white.png")
+black = pygame.image.load("Images/menu/black.png")
+main_menu()

@@ -220,6 +220,12 @@ class GameState():
                 moves.remove(moves[i])
 
         print("len of moves " + str(len(moves)))
+        if len(moves) == 2:
+            print(str(moves[0].startRow) + str(moves[0].startCol))
+            print(str(moves[0].endRow) + str(moves[0].endCol))
+            print(str(moves[1].startRow) + str(moves[1].startCol))
+            print(str(moves[1].endRow) + str(moves[1].endCol))
+
         isProtectedPiece = False
         if len(moves) == 1:
             isProtectedPiece = self.isProtected(moves[0])

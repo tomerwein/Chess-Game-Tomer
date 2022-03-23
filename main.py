@@ -34,7 +34,8 @@ def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font("Images/menu/font.ttf", size)
 
 def main_menu():
-    BG = pygame.image.load("Images/menu/Background.png")
+    BG = pygame.image.load("Images/menu/Background.jpg")
+    BG = pygame.transform.scale(BG, (550, 550))
     running = True
     while running:
         screen.blit(BG, (0, 0))
@@ -48,11 +49,11 @@ def main_menu():
         MENU_RECT = MENU_TEXT.get_rect(center=(260, 100))
 
         PLAY_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 200),
-                             text_input="PLAY",font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+                             text_input="PLAY",font=get_font(30), base_color="slate blue", hovering_color="Purple")
         OPTIONS_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 300),
-                                text_input="OPTIONS", font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+                                text_input="OPTIONS", font=get_font(30), base_color="slate blue", hovering_color="Purple")
         QUIT_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 400),
-                             text_input="QUIT", font=get_font(30), base_color="#d7fcd4", hovering_color="Cyan")
+                             text_input="QUIT", font=get_font(30), base_color="slate blue", hovering_color="Purple")
 
         screen.blit(MENU_TEXT, MENU_RECT)
 

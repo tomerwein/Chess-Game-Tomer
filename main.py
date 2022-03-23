@@ -82,6 +82,7 @@ def game():
     gs = ChessEngine.GameState()
     running = True
     gameOn = True
+    mateFirstTime = False
     while running:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -109,11 +110,14 @@ def game():
 
                 if e.type == pygame.KEYDOWN:
                     if e.key == pygame.K_LEFT:
+                        if mateFirstTime:
+                            mateFirstTime = False
                         gs.undoMove()
                     if e.key == pygame.K_RIGHT:
                         gs.redoMove()
 
-                if gameOn and gs.checkMate():
+                if gameOn and gs.checkMate() and not mateFirstTime:
+                    mateFirstTime = True
                     gameOn = False
 
                 drawGameState(screen, gs.board)
@@ -122,8 +126,12 @@ def game():
                 drawGameState(screen, gs.board)
                 screen.blit(checkMate, (128,150))
 
-                if e.type == pygame.MOUSEBUTTONDOWN:
-                    location = pygame.mouse.get_pos() # get x,y pos
+                if e.type == pygame.KEYDOWN:
+                    if e.key == pygame.K_LEFT:
+                        screen.fill("black")
+                        drawGameState(screen, gs.board)
+                        gs.notCheckMate1()
+                        gameOn = True
 
         clock.tick(FPS)
         pygame.display.flip()

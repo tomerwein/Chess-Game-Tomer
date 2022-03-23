@@ -27,6 +27,9 @@ class GameState():
         self.turnsNoEatNoMovePawn = 0
         self.checkMate1 = False
 
+    def notCheckMate1(self):
+        self.checkMate1 = False
+
     def makeMove(self, move):
         # check the color of the current player
 

@@ -41,8 +41,6 @@ def main_menu():
         screen.blit(BG, (0, 0))
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
-        image_white = pygame.transform.scale(white, (125, 250))
-        image_black = pygame.transform.scale(black, (125, 250))
         screen.blit(image_white, (0,140))
         screen.blit(image_black, (390, 140))
         MENU_TEXT = get_font(40).render("MAIN MENU", True, "#b68f40")
@@ -116,22 +114,35 @@ def game():
                     if e.key == pygame.K_RIGHT:
                         gs.redoMove()
 
-                if gameOn and gs.checkMate() and not mateFirstTime:
-                    mateFirstTime = True
+                if gameOn and gs.getStatus() == 2:
+                    gameOn = False
+
+                elif gameOn and gs.getStatus() == 3:
                     gameOn = False
 
                 drawGameState(screen, gs.board)
 
+            elif gs.getStatus() == 2:
+                drawGameState(screen, gs.board)
+                screen.blit(checkMate, (10,120))
             else:
                 drawGameState(screen, gs.board)
-                screen.blit(checkMate, (128,150))
+                screen.blit(stalemate, (10, 120))
 
-                if e.type == pygame.KEYDOWN:
-                    if e.key == pygame.K_LEFT:
-                        screen.fill("black")
-                        drawGameState(screen, gs.board)
-                        gs.notCheckMate1()
-                        gameOn = True
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_LEFT:
+                    screen.fill("black")
+                    drawGameState(screen, gs.board)
+                    gs.notCheckMate()
+                    gameOn = True
+
+                if e.key == pygame.K_q:
+                    running = False
+
+                if e.key == pygame.K_r:
+                    screen.fill("white")
+                    game()
+                    running = False
 
         clock.tick(FPS)
         pygame.display.flip()
@@ -165,7 +176,6 @@ IMAGES = {}
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 loadImages()  # load the Images only once
-checkMate = pygame.image.load("Images/game/checkMate.jpg")
-white = pygame.image.load("Images/menu/white.png")
-black = pygame.image.load("Images/menu/black.png")
 main_menu()
+
+

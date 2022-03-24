@@ -25,10 +25,10 @@ class GameState():
         self.countTurns = 0
         self.countPieces = 32
         self.turnsNoEatNoMovePawn = 0
-        self.checkMate1 = False
+        self.status = 1
 
-    def notCheckMate1(self):
-        self.checkMate1 = False
+    def notCheckMate(self):
+        self.status = 1
 
     def makeMove(self, move):
         # check the color of the current player
@@ -44,9 +44,13 @@ class GameState():
                 print(str(possible_moves[0].endRow) + str(possible_moves[0].endRow))
 
             # check if the specific move is legal
-            specialMove = False
+            specialMove, kingRockMoved = False, False
             if self.isMoveLegal(move, possible_moves):
-                if self.moveSpecial(move):
+                if self.board[move.startRow][move.startCol] == "bK" and not self.blackKingMoved:
+                    self.blackKingMoved, kingRockMoved = True, True
+                elif self.board[move.startRow][move.startCol] == "wK" and not self.whiteKingMoved:
+                    self.whiteKingMoved, kingRockMoved = True, True
+                elif self.moveSpecial(move):
                     specialMove = True
                 endPoint = self.board[move.endRow][move.endCol]
                 startPoint = self.board[move.startRow][move.startCol]
@@ -65,7 +69,7 @@ class GameState():
                     # check if a rock moved
                 if startPoint == "wR" or \
                         startPoint == "bR":
-                    self.updateRockMoves(move)
+                    kingRockMoved = self.updateRockMoves(move)
 
             elif self.castling(move):
                 endPoint = self.board[move.endRow][move.endCol]
@@ -79,11 +83,11 @@ class GameState():
             # if move legal, add the move to the moveLog (saves all the moves that had been done)
 
             if self.index == len(self.moveLog) - 1:
-                self.moveLog.append([move, endPoint, specialMove, new_piece])
+                self.moveLog.append([move, endPoint, specialMove, new_piece, kingRockMoved])
             else:
                 while self.index != len(self.moveLog) - 1:
                     self.moveLog.pop()
-                self.moveLog.append([move, endPoint, specialMove, new_piece])
+                self.moveLog.append([move, endPoint, specialMove, new_piece, kingRockMoved])
 
             currentColor = "b"
             if self.whiteToMove:
@@ -103,24 +107,28 @@ class GameState():
             # self.removeIllegalKingMoves(possible_moves, opposite_moves)
 
             # check if there is a check-mate
-            if self.checkExist(opposite_moves):
-                if self.mateExist(possible_moves, opposite_moves):
-                    self.checkMate1 = True
-                    print("check-mate")
 
             # check if there is a stalemate
-            elif len(possible_moves) == 0:
-                print("Pat1")
+
+            if self.checkExist(opposite_moves) and self.mateExist(possible_moves):
+                self.status = 2
+                print("check-mate")
+
+            else:
+                print("possible moves" + str(len(possible_moves)))
+                self.removeIllegalKingMoves(possible_moves, opposite_moves)
+                if len(possible_moves) == 0:
+                    self.status = 3
 
             # check if there is a pat of three-fold repetition
-            if len(self.moveLog) > 10 and self.checkThreeFoldRepetition():
-                print("Pat2")
+            if len(self.moveLog) > 9 and self.checkThreeFoldRepetition():
+                self.status = 3
 
-            elif self.insufficientMaterial():
-                print("Pat3")
+            if self.insufficientMaterial():
+                self.status = 3
 
             if self.checkFiftyMovesRule():
-                print("Pat4")
+                self.status = 3
 
     def moveSpecial(self, move):
         if self.whiteToMove:
@@ -188,24 +196,31 @@ class GameState():
         return False
 
     def checkThreeFoldRepetition(self):
+        print()
+        self.whiteToMove = not self.whiteToMove  # swap players move
         move_one, move_two, countReptition = self.moveLog[-1][0], self.moveLog[-2][0], 1
-        start = self.board[move_one.endRow][move_one.endCol]
-        end = self.board[move_one.endRow][move_one.endCol]
+        rowOne, colOne = move_one.endRow, move_one.endCol
+        rowTwo, colTwo = move_two.endRow, move_two.endCol
+
+        pieceOne = self.board[move_one.endRow][move_one.endCol]
+        pieceTwo = self.board[move_two.endRow][move_two.endCol]
 
         for repeat in range(1, 3):
             move_one, move_two = self.moveLog[-1 - repeat * 4][0], self.moveLog[-2 - repeat * 4][0]
-            if start == self.board[move_one.endRow][move_one.endCol] and \
-                    end == self.board[move_one.endRow][move_one.endCol]:
+            if pieceOne == self.board[move_one.endRow][move_one.endCol] and \
+                    pieceTwo == self.board[move_two.endRow][move_two.endCol]\
+                    and rowOne == move_one.endRow and colOne == move_one.endCol\
+                    and rowTwo == move_two.endRow and colTwo == move_two.endCol:
                 countReptition += 1
 
         print(countReptition)
+        self.whiteToMove = not self.whiteToMove  # swap players move
         if countReptition == 3:
             return True
         return False
 
-    def mateExist(self, moves, opp_moves):
-        # self.removeIllegalKingMoves(moves, opp_moves)
-
+    def mateExist(self, moves):
+        print("cp1" + str(len(moves)))
         for i in range(len(moves) - 1, -1, -1):
             bol = True
             startMove = self.board[moves[i].startRow][moves[i].startCol]
@@ -213,6 +228,7 @@ class GameState():
             self.board[moves[i].startRow][moves[i].startCol] = "--"
             self.board[moves[i].endRow][moves[i].endCol] = startMove
 
+            opp_moves = self.getOppositePossibleMoves()
             if not self.checkExist(opp_moves):
                 bol = False
 
@@ -257,14 +273,17 @@ class GameState():
 
     def updateRockMoves(self, move):
         r, c = move.startRow, move.startCol
-        if r == 0 and c == 0:
-            self.blackLeftRockMoved = True
-        elif r == 0 and c == 7:
-            self.blackRightRockMoved = True
-        elif r == 7 and c == 0:
-            self.whiteLeftRockMoved = True
-        elif r == 7 and c == 7:
-            self.whiteRightRockMoved = True
+        updated = False
+        if r == 0 and c == 0 and not self.blackLeftRockMoved:
+            updated, self.blackLeftRockMoved = True, True
+        elif r == 0 and c == 7 and not self.blackRightRockMoved:
+            updated, self.blackRightRockMoved = True, True
+        elif r == 7 and c == 0 and not self.whiteLeftRockMoved:
+            updated, self.whiteLeftRockMoved = True, True
+        elif r == 7 and c == 7 and not self.whiteRightRockMoved:
+            updated, self.whiteRightRockMoved = True, True
+
+        return updated
 
     def isMoveLegal(self, move, possible_moves):
         for checkMove in possible_moves:
@@ -280,18 +299,22 @@ class GameState():
             if move[0] == Move((7, 4), (7, 6)):
                 self.board[7][4], self.board[7][7] = "wK", "wR"
                 self.board[7][5], self.board[7][6] = "--", "--"
+                self.whiteKingMoved = False
 
             elif move[0] == Move((7, 4), (7, 2)):
                 self.board[7][4], self.board[7][0] = "wK", "wR"
                 self.board[7][2], self.board[7][3] = "--", "--"
+                self.whiteKingMoved = False
 
             elif move[0] == Move((0, 4), (0, 6)):
                 self.board[0][4], self.board[0][7] = "bK", "bR"
                 self.board[0][5], self.board[0][6] = "--", "--"
+                self.blackKingMoved = False
 
             elif move[0] == Move((0, 4), (0, 2)):
                 self.board[0][4], self.board[0][0] = "bK", "bR"
                 self.board[0][2], self.board[0][3] = "--", "--"
+                self.blackKingMoved = False
 
             # Undo the rest of the cases
             else:
@@ -306,13 +329,30 @@ class GameState():
                 self.board[move[0].startRow][move[0].startCol] = \
                     self.board[move[0].endRow][move[0].endCol]
                 self.board[move[0].endRow][move[0].endCol] = move[1]
-                self.whiteToMove = not self.whiteToMove  # swap players move
+
+
+                # if the rock moved for the first time
+                if move[4]:
+                    r, c = move[0].startRow, move[0].startCol
+                    if r == 0 and c == 4 and self.board[r][c] == "bK":
+                        self.blackKingMoved = False
+                    if r == 7 and c == 4 and self.board[r][c] == "wK":
+                        self.whiteKingMoved = False
+                    if r == 0 and c == 0:
+                        self.blackLeftRockMoved = False
+                    elif r == 0 and c == 7:
+                        self.blackRightRockMoved = False
+                    elif r == 7 and c == 0:
+                        self.whiteLeftRockMoved = False
+                    elif r == 7 and c == 7:
+                        self.whiteRightRockMoved = False
 
                 if move[3] != "0" and move[0].endRow == 0:
                     self.board[move[0].startRow][move[0].startCol] = "wP"
                 elif move[3] != "0" and move[0].endRow == 7:
                     self.board[move[0].startRow][move[0].startCol] = "bP"
 
+            self.whiteToMove = not self.whiteToMove  # swap players move
             self.index -= 1
 
     def redoMove(self):
@@ -838,5 +878,5 @@ class GameState():
 
         return new_piece
 
-    def checkMate(self):
-        return self.checkMate1
+    def getStatus(self):
+        return self.status

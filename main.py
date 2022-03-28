@@ -2,6 +2,7 @@ import pygame
 from constants import *
 import ChessEngine
 from Button import *
+from helper import screen
 
 def loadImages():
     #Pawns
@@ -36,6 +37,7 @@ def get_font(size): # Returns Press-Start-2P in the desired size
 def main_menu():
     BG = pygame.image.load("Images/menu/Background.jpg")
     BG = pygame.transform.scale(BG, (550, 550))
+    rect = pygame.image.load("Images/menu/rect.png")
     running = True
     while running:
         screen.blit(BG, (0, 0))
@@ -46,11 +48,11 @@ def main_menu():
         MENU_TEXT = get_font(40).render("MAIN MENU", True, "#b68f40")
         MENU_RECT = MENU_TEXT.get_rect(center=(260, 100))
 
-        PLAY_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 200),
+        PLAY_BUTTON = Button(image=rect, pos=(260, 200),
                              text_input="PLAY",font=get_font(30), base_color="slate blue", hovering_color="Purple")
-        OPTIONS_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 300),
+        OPTIONS_BUTTON = Button(image=rect, pos=(260, 300),
                                 text_input="OPTIONS", font=get_font(30), base_color="slate blue", hovering_color="Purple")
-        QUIT_BUTTON = Button(image=pygame.image.load("Images/menu/rect.png"), pos=(260, 400),
+        QUIT_BUTTON = Button(image=rect, pos=(260, 400),
                              text_input="QUIT", font=get_font(30), base_color="slate blue", hovering_color="Purple")
 
         screen.blit(MENU_TEXT, MENU_RECT)
@@ -168,13 +170,16 @@ def drawPieces(screen, board):
             if board[r][c] in IMAGES:
                 screen.blit(IMAGES[board[r][c]], pygame.Rect(c*SQ_SIZE-2, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
-WIDTH = HEIGHT = 512
+
 DIMENSION = 8  #8X8 board
+HEIGHT = 512
 SQ_SIZE = HEIGHT // DIMENSION
 FPS = 15
 IMAGES = {}
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+
+
 loadImages()  # load the Images only once
 main_menu()
 

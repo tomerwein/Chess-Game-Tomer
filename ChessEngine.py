@@ -1,5 +1,8 @@
-from Move import *
+import pygame
 
+from Move import *
+from helper import *
+from buttons import *
 
 class GameState():
     def __init__(self):
@@ -14,6 +17,10 @@ class GameState():
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
+
+        self.dimension = 8  # 8X8 board
+        self.height = 512
+        self.SQ = self.height // self.dimension
         self.whiteToMove = True
         self.moveLog = []
         self.realRows = {0: "8", 1: "7", 2: "6", 3: "5", 4: "4", 5: "3", 6: "2", 7: "1"}
@@ -842,13 +849,37 @@ class GameState():
         new_piece = "0"
         for i in range(len(self.board)):
             if self.board[0][i] == "wP":
-                new_piece = input("""
-                Choose your new piece: 
-                 1 - for Queen  
-                 2 - for Rock 
-                 3 - for Bishop 
-                 4 - for knight 
-                 """)
+                promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
+                imageWQ = pygame.transform.scale(pygame.image.load("Images/promotion/wQ.png"), (80,80))
+                imageWR = pygame.transform.scale(pygame.image.load("Images/promotion/wR.png"), (80, 80))
+                imageWB = pygame.transform.scale(pygame.image.load("Images/promotion/wB.png"), (80, 80))
+                imageWN = pygame.transform.scale(pygame.image.load("Images/promotion/wN.png"), (80, 80))
+                screen.blit(promotion, (95,50))
+                screen.blit(imageWQ, (95,50))
+                screen.blit(imageWR, (175, 50))
+                screen.blit(imageWB, (255, 50))
+                screen.blit(imageWN, (335, 50))
+
+                pygame.display.flip()
+
+                while new_piece == "0":
+                    for event in pygame.event.get():
+                        # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
+                        #     button.changeColor(event.pos)
+                        #     button.update(screen)
+
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            if mouse_in_button(whiteQueen, event.pos):
+                                new_piece = "1"
+
+                            if mouse_in_button(whiteRock, event.pos):
+                                new_piece = "2"
+
+                            if mouse_in_button(whiteBishop, event.pos):
+                                new_piece = "3"
+
+                            if mouse_in_button(whiteKnight, event.pos):
+                                new_piece = "4"
 
                 if new_piece == "1":
                     self.board[0][i] = "wQ"
@@ -860,13 +891,37 @@ class GameState():
                     self.board[0][i] = "wN"
 
             elif self.board[7][i] == "bP":
-                new_piece = input("""
-                Choose your new piece: 
-                1 - for Queen  
-                2 - for Rock  
-                3 - for Bishop 
-                4 - for knight 
-                """)
+                promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
+                imageBQ = pygame.transform.scale(pygame.image.load("Images/promotion/bQ.png"), (80, 80))
+                imageBR = pygame.transform.scale(pygame.image.load("Images/promotion/bR.png"), (80, 80))
+                imageBB = pygame.transform.scale(pygame.image.load("Images/promotion/bB.png"), (80, 80))
+                imageBN = pygame.transform.scale(pygame.image.load("Images/promotion/bN.png"), (80, 80))
+                screen.blit(promotion, (95, 385))
+                screen.blit(imageBQ, (95, 385))
+                screen.blit(imageBR, (175, 385))
+                screen.blit(imageBB, (255, 385))
+                screen.blit(imageBN, (335, 385))
+                pygame.display.flip()
+
+                while new_piece == "0":
+                    for event in pygame.event.get():
+                        # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
+                        #     button.changeColor(event.pos)
+                        #     button.update(screen)
+
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            if mouse_in_button(blackQueen, event.pos):
+                                new_piece = "1"
+
+                            if mouse_in_button(blackRock, event.pos):
+                                new_piece = "2"
+
+                            if mouse_in_button(blackBishop, event.pos):
+                                new_piece = "3"
+
+                            if mouse_in_button(blackKnight, event.pos):
+                                new_piece = "4"
+
                 if new_piece == "1":
                     self.board[7][i] = "bQ"
                 elif new_piece == "2":

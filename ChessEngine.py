@@ -849,19 +849,7 @@ class GameState():
         new_piece = "0"
         for i in range(len(self.board)):
             if self.board[0][i] == "wP":
-                promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
-                imageWQ = pygame.transform.scale(pygame.image.load("Images/promotion/wQ.png"), (80,80))
-                imageWR = pygame.transform.scale(pygame.image.load("Images/promotion/wR.png"), (80, 80))
-                imageWB = pygame.transform.scale(pygame.image.load("Images/promotion/wB.png"), (80, 80))
-                imageWN = pygame.transform.scale(pygame.image.load("Images/promotion/wN.png"), (80, 80))
-                screen.blit(promotion, (95,50))
-                screen.blit(imageWQ, (95,50))
-                screen.blit(imageWR, (175, 50))
-                screen.blit(imageWB, (255, 50))
-                screen.blit(imageWN, (335, 50))
-
-                pygame.display.flip()
-
+                self.loadBlackPromotion()
                 while new_piece == "0":
                     for event in pygame.event.get():
                         # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
@@ -891,18 +879,7 @@ class GameState():
                     self.board[0][i] = "wN"
 
             elif self.board[7][i] == "bP":
-                promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
-                imageBQ = pygame.transform.scale(pygame.image.load("Images/promotion/bQ.png"), (80, 80))
-                imageBR = pygame.transform.scale(pygame.image.load("Images/promotion/bR.png"), (80, 80))
-                imageBB = pygame.transform.scale(pygame.image.load("Images/promotion/bB.png"), (80, 80))
-                imageBN = pygame.transform.scale(pygame.image.load("Images/promotion/bN.png"), (80, 80))
-                screen.blit(promotion, (95, 385))
-                screen.blit(imageBQ, (95, 385))
-                screen.blit(imageBR, (175, 385))
-                screen.blit(imageBB, (255, 385))
-                screen.blit(imageBN, (335, 385))
-                pygame.display.flip()
-
+                self.loadBlackPromotion()
                 while new_piece == "0":
                     for event in pygame.event.get():
                         # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
@@ -935,3 +912,30 @@ class GameState():
 
     def getStatus(self):
         return self.status
+
+    def loadWhitePromotion(self):
+        promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
+        imageWQ = pygame.transform.scale(pygame.image.load("Images/promotion/wQ.png"), (80, 80))
+        imageWR = pygame.transform.scale(pygame.image.load("Images/promotion/wR.png"), (80, 80))
+        imageWB = pygame.transform.scale(pygame.image.load("Images/promotion/wB.png"), (80, 80))
+        imageWN = pygame.transform.scale(pygame.image.load("Images/promotion/wN.png"), (80, 80))
+        screen.blit(promotion, (95, 50))
+        screen.blit(imageWQ, (95, 50))
+        screen.blit(imageWR, (175, 50))
+        screen.blit(imageWB, (255, 50))
+        screen.blit(imageWN, (335, 50))
+
+        pygame.display.flip()
+
+    def loadBlackPromotion(self):
+        promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
+        imageBQ = pygame.transform.scale(pygame.image.load("Images/promotion/bQ.png"), (80, 80))
+        imageBR = pygame.transform.scale(pygame.image.load("Images/promotion/bR.png"), (80, 80))
+        imageBB = pygame.transform.scale(pygame.image.load("Images/promotion/bB.png"), (80, 80))
+        imageBN = pygame.transform.scale(pygame.image.load("Images/promotion/bN.png"), (80, 80))
+        screen.blit(promotion, (95, 385))
+        screen.blit(imageBQ, (95, 385))
+        screen.blit(imageBR, (175, 385))
+        screen.blit(imageBB, (255, 385))
+        screen.blit(imageBN, (335, 385))
+        pygame.display.flip()

@@ -2,7 +2,6 @@ from Move import *
 from helper import *
 from Buttons.buttons import *
 
-
 class GameState():
     def __init__(self):
         # Chess Bored 8X8
@@ -17,7 +16,7 @@ class GameState():
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
 
-        self.dimension = 8  # 8X8 board
+        self.dimension = 8
         self.height = 512
         self.SQ = self.height // self.dimension
         self.whiteToMove = True
@@ -34,23 +33,16 @@ class GameState():
         self.status = 1
 
     def notCheckMate(self):
+        # this function changes the status of the game from stale-mate or check-mate to game on
         self.status = 1
 
     def makeMove(self, move):
-        # check the color of the current player
-
+        # check if the press is legal (the right color is playing)
         if self.checkPossibleColor(move):
-            # check if there is a check
-
             possible_moves = self.getPossibleMoves()
-            opposite_moves = self.getOppositePossibleMoves()
-            print(len(possible_moves))
-            if len(possible_moves) == 1:
-                print(str(possible_moves[0].startRow) + str(possible_moves[0].startCol))
-                print(str(possible_moves[0].endRow) + str(possible_moves[0].endRow))
-
-            # check if the specific move is legal
             specialMove, kingRockMoved = False, False
+
+            # this function changes the status of the game from stale-mate or check-mate to game on
             if self.isMoveLegal(move, possible_moves):
                 if self.board[move.startRow][move.startCol] == "bK" and not self.blackKingMoved:
                     self.blackKingMoved, kingRockMoved = True, True
@@ -58,13 +50,13 @@ class GameState():
                     self.whiteKingMoved, kingRockMoved = True, True
                 elif self.moveSpecial(move):
                     specialMove = True
+
                 endPoint = self.board[move.endRow][move.endCol]
                 startPoint = self.board[move.startRow][move.startCol]
-
                 self.board[move.endRow][move.endCol] = startPoint
                 self.board[move.startRow][move.startCol] = "--"
 
-                # check if still there is a check
+                # check if there is a check and a move to get away of that needed
                 opposite_possible_moves = self.getOppositePossibleMoves()
                 if self.checkExist(opposite_possible_moves):
                     self.board[move.startRow][move.startCol] = startPoint
@@ -72,22 +64,22 @@ class GameState():
                     print("illegal")
                     return
 
-                    # check if a rock moved
+                # check if any rock had moved (for castling matter)
                 if startPoint == "wR" or \
                         startPoint == "bR":
                     kingRockMoved = self.updateRockMoves(move)
 
+            # check if the current move is castling
             elif self.castling(move):
                 endPoint = self.board[move.endRow][move.endCol]
 
             else:
                 return
 
-                # check promotion
+            # check if the current move is a promotion
             new_piece = self.promotion()
 
             # if move legal, add the move to the moveLog (saves all the moves that had been done)
-
             if self.index == len(self.moveLog) - 1:
                 self.moveLog.append([move, endPoint, specialMove, new_piece, kingRockMoved])
             else:
@@ -110,33 +102,32 @@ class GameState():
 
             opposite_moves = self.getOppositePossibleMoves()
             possible_moves = self.getPossibleMoves()
-            # self.removeIllegalKingMoves(possible_moves, opposite_moves)
 
             # check if there is a check-mate
-
-            # check if there is a stalemate
-
             if self.checkExist(opposite_moves) and self.mateExist(possible_moves):
                 self.status = 2
                 print("check-mate")
 
             else:
-                print("possible moves" + str(len(possible_moves)))
+                # check if there is a stalemate
                 self.removeIllegalKingMoves(possible_moves, opposite_moves)
                 if len(possible_moves) == 0:
                     self.status = 3
 
-            # check if there is a pat of three-fold repetition
+            # check if there is a stalemate of three-fold repetition
             if len(self.moveLog) > 9 and self.checkThreeFoldRepetition():
                 self.status = 3
 
+            # check if there is a stalemate by insufficient material
             if self.insufficientMaterial():
                 self.status = 3
 
+            # check if there is a stalemate by 50 moves no pawn move or no eat
             if self.checkFiftyMovesRule():
                 self.status = 3
 
     def moveSpecial(self, move):
+        # check if there is an En passant move
         if self.whiteToMove:
             if move.startRow == 3 and self.board[move.startRow][move.startCol] == "wP" and \
                     self.board[move.endRow][move.endCol] == "--":
@@ -182,7 +173,7 @@ class GameState():
         return False
 
     def insufficientMaterial(self):
-        countEmptySqaures, activeSquares = 0, {}
+        activeSquares = {}
         for r in range(8):
             for c in range(8):
                 if self.board[r][c] != "--":
@@ -202,7 +193,7 @@ class GameState():
         return False
 
     def checkThreeFoldRepetition(self):
-        print()
+        # save the first move
         self.whiteToMove = not self.whiteToMove  # swap players move
         move_one, move_two, countReptition = self.moveLog[-1][0], self.moveLog[-2][0], 1
         rowOne, colOne = move_one.endRow, move_one.endCol
@@ -211,6 +202,7 @@ class GameState():
         pieceOne = self.board[move_one.endRow][move_one.endCol]
         pieceTwo = self.board[move_two.endRow][move_two.endCol]
 
+        # check if the first move repeats 2 more times in a row
         for repeat in range(1, 3):
             move_one, move_two = self.moveLog[-1 - repeat * 4][0], self.moveLog[-2 - repeat * 4][0]
             if pieceOne == self.board[move_one.endRow][move_one.endCol] and \
@@ -219,14 +211,13 @@ class GameState():
                     and rowTwo == move_two.endRow and colTwo == move_two.endCol:
                 countReptition += 1
 
-        print(countReptition)
         self.whiteToMove = not self.whiteToMove  # swap players move
         if countReptition == 3:
             return True
         return False
 
     def mateExist(self, moves):
-        print("cp1" + str(len(moves)))
+        # check if check-mate exists
         for i in range(len(moves) - 1, -1, -1):
             bol = True
             startMove = self.board[moves[i].startRow][moves[i].startCol]
@@ -235,6 +226,7 @@ class GameState():
             self.board[moves[i].endRow][moves[i].endCol] = startMove
 
             opp_moves = self.getOppositePossibleMoves()
+            # if this is a move which can get away of the check, return False and the game continues
             if not self.checkExist(opp_moves):
                 bol = False
 
@@ -244,13 +236,8 @@ class GameState():
             if bol:
                 moves.remove(moves[i])
 
-        print("len of moves " + str(len(moves)))
-        if len(moves) == 2:
-            print(str(moves[0].startRow) + str(moves[0].startCol))
-            print(str(moves[0].endRow) + str(moves[0].endCol))
-            print(str(moves[1].startRow) + str(moves[1].startCol))
-            print(str(moves[1].endRow) + str(moves[1].endCol))
-
+        # if the only legal move of a king is to eat a piece, check if this piece is protected
+        # if it does it's check-mate
         isProtectedPiece = False
         if len(moves) == 1:
             isProtectedPiece = self.isProtected(moves[0])
@@ -258,11 +245,13 @@ class GameState():
             print(str(moves[0].startRow) + str(moves[0].startCol))
             print(str(moves[0].endRow) + str(moves[0].endCol))
 
+        # if no moves left, check-mate!
         if len(moves) == 0 or isProtectedPiece:
             return True
         return False
 
     def checkExist(self, opposite_moves):
+        # check if there is a check
         if self.whiteToMove:
             for checkMove in opposite_moves:
                 if self.board[checkMove.startRow][checkMove.startCol][0] == "b" and \
@@ -324,6 +313,7 @@ class GameState():
 
             # Undo the rest of the cases
             else:
+                # check if undo of En passant is needed
                 if move[2]:
                     if self.whiteToMove:
                         c = move[0].startCol - move[0].endCol
@@ -336,7 +326,8 @@ class GameState():
                     self.board[move[0].endRow][move[0].endCol]
                 self.board[move[0].endRow][move[0].endCol] = move[1]
 
-                # if the rock moved for the first time
+                # check if a king or a rock had moved in
+                # the previous term and change it in accordance
                 if move[4]:
                     r, c = move[0].startRow, move[0].startCol
                     if r == 0 and c == 4 and self.board[r][c] == "bK":
@@ -352,12 +343,15 @@ class GameState():
                     elif r == 7 and c == 7:
                         self.whiteRightRockMoved = False
 
+                # check if there was a promotion
                 if move[3] != "0" and move[0].endRow == 0:
                     self.board[move[0].startRow][move[0].startCol] = "wP"
                 elif move[3] != "0" and move[0].endRow == 7:
                     self.board[move[0].startRow][move[0].startCol] = "bP"
 
             self.whiteToMove = not self.whiteToMove  # swap players move
+            if self.whiteToMove:
+                self.countTurns -= 1
             self.index -= 1
 
     def redoMove(self):
@@ -409,6 +403,8 @@ class GameState():
                     self.board[move[0].startRow][move[0].startCol]
                 self.board[move[0].startRow][move[0].startCol] = "--"
                 self.whiteToMove = not self.whiteToMove  # swap players move
+                if not self.whiteToMove:
+                    self.countTurns += 1
 
     def checkPossibleColor(self, move):
         if self.whiteToMove and self.board[move.startRow][move.startCol][0] == 'w':

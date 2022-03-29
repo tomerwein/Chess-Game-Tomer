@@ -28,9 +28,7 @@ def loadImages():
     IMAGES['bK'] = pygame.transform.scale(pygame.image.load("Images/game/bK.png"), (SQ_SIZE, SQ_SIZE))
     IMAGES['wK'] = pygame.transform.scale(pygame.image.load("Images/game/wK.png"), (SQ_SIZE, SQ_SIZE))
 
-# def get_font(size): # Returns Press-Start-2P in the desired size
-#     return pygame.font.Font(pygame.font.SysFont('chalkduster.ttf', 15), size)
-def get_font(size): # Returns Press-Start-2P in the desired size
+def get_font(size):
     return pygame.font.Font("Images/menu/MorningRainbow.ttf", size)
 
 def main_menu():
@@ -79,9 +77,8 @@ def game():
     clock = pygame.time.Clock()
     screen.fill(pygame.Color("white"))
     gs = ChessEngine.GameState()
-    running = True
-    gameOn = True
-    mateFirstTime = False
+    running, gameOn = True, True
+
     while running:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -109,8 +106,6 @@ def game():
 
                 if e.type == pygame.KEYDOWN:
                     if e.key == pygame.K_LEFT:
-                        if mateFirstTime:
-                            mateFirstTime = False
                         gs.undoMove()
                     if e.key == pygame.K_RIGHT:
                         gs.redoMove()
@@ -150,19 +145,21 @@ def game():
 
 # Draw the game state on the boards (Basically the graphics)
 def drawGameState(screen, board):
-    drawBoard(screen) # draw the board
-    drawPieces(screen, board) # draw the pieces on the top of the board
+    drawBoard(screen)
+    drawPieces(screen, board)
 
+# draw the board
 def drawBoard(screen):
     colors = [pygame.Color("white"), pygame.Color("skyblue")]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             if (r+c) % 2 == 0:
-                color = colors[0] # it's a white piece of board
+                color = colors[0]
             else:
-                color = colors[1] # it's a black piece of board
+                color = colors[1]
             pygame.draw.rect(screen, color, pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
+# draw the pieces
 def drawPieces(screen, board):
     for r in range(len(board)):
         for c in range(len(board)):
@@ -170,15 +167,11 @@ def drawPieces(screen, board):
                 screen.blit(IMAGES[board[r][c]], pygame.Rect(c*SQ_SIZE-2, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
-DIMENSION = 8  #8X8 board
-HEIGHT = 512
+DIMENSION, HEIGHT = 8, 512  
 SQ_SIZE = HEIGHT // DIMENSION
 FPS = 15
 IMAGES = {}
 pygame.init()
-
-
-
 loadImages()  # load the Images only once
 main_menu()
 

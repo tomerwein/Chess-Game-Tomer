@@ -31,10 +31,10 @@ def loadImages():
 # def get_font(size): # Returns Press-Start-2P in the desired size
 #     return pygame.font.Font(pygame.font.SysFont('chalkduster.ttf', 15), size)
 def get_font(size): # Returns Press-Start-2P in the desired size
-    return pygame.font.Font("Images/menu/font.ttf", size)
+    return pygame.font.Font("Images/menu/MorningRainbow.ttf", size)
 
 def main_menu():
-    BG = pygame.image.load("Images/menu/Background.jpg")
+    BG = pygame.image.load("Images/menu/background.jpg")
     BG = pygame.transform.scale(BG, (550, 550))
     rect = pygame.image.load("Images/menu/rect.png")
     running = True
@@ -44,15 +44,15 @@ def main_menu():
         MENU_MOUSE_POS = pygame.mouse.get_pos()
         screen.blit(image_white, (0,140))
         screen.blit(image_black, (390, 140))
-        MENU_TEXT = get_font(40).render("MAIN MENU", True, "#b68f40")
+        MENU_TEXT = get_font(70).render("MAIN MENU", True, "orange3")
         MENU_RECT = MENU_TEXT.get_rect(center=(260, 100))
 
         PLAY_BUTTON = MenuButton(image=rect, pos=(260, 200),
-                                 text_input="PLAY", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+                                 text_input="PLAY", font=get_font(40), base_color="slate blue", hovering_color="Purple")
         OPTIONS_BUTTON = MenuButton(image=rect, pos=(260, 300),
-                                    text_input="OPTIONS", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+                                    text_input="OPTIONS", font=get_font(40), base_color="slate blue", hovering_color="Purple")
         QUIT_BUTTON = MenuButton(image=rect, pos=(260, 400),
-                                 text_input="QUIT", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+                                 text_input="QUIT", font=get_font(40), base_color="slate blue", hovering_color="Purple")
 
         screen.blit(MENU_TEXT, MENU_RECT)
 

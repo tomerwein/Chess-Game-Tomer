@@ -1,8 +1,6 @@
-import pygame
-
 from Move import *
 from helper import *
-from buttons import *
+from Buttons.buttons import *
 
 
 class GameState():

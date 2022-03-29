@@ -1,7 +1,6 @@
-import pygame
 from constants import *
 import ChessEngine
-from MenuButton import *
+from Buttons.MenuButton import *
 from helper import screen
 
 def loadImages():

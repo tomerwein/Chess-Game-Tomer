@@ -1,5 +1,5 @@
 import pygame
-from PromotionButton import PromotionButton
+from Buttons.PromotionButton import PromotionButton
 
 DIMENSION = 8  #8X8 board
 HEIGHT = 512

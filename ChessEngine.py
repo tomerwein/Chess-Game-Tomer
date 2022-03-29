@@ -4,6 +4,7 @@ from Move import *
 from helper import *
 from buttons import *
 
+
 class GameState():
     def __init__(self):
         # Chess Bored 8X8
@@ -215,8 +216,8 @@ class GameState():
         for repeat in range(1, 3):
             move_one, move_two = self.moveLog[-1 - repeat * 4][0], self.moveLog[-2 - repeat * 4][0]
             if pieceOne == self.board[move_one.endRow][move_one.endCol] and \
-                    pieceTwo == self.board[move_two.endRow][move_two.endCol]\
-                    and rowOne == move_one.endRow and colOne == move_one.endCol\
+                    pieceTwo == self.board[move_two.endRow][move_two.endCol] \
+                    and rowOne == move_one.endRow and colOne == move_one.endCol \
                     and rowTwo == move_two.endRow and colTwo == move_two.endCol:
                 countReptition += 1
 
@@ -336,7 +337,6 @@ class GameState():
                 self.board[move[0].startRow][move[0].startCol] = \
                     self.board[move[0].endRow][move[0].endCol]
                 self.board[move[0].endRow][move[0].endCol] = move[1]
-
 
                 # if the rock moved for the first time
                 if move[4]:
@@ -473,7 +473,8 @@ class GameState():
             # check white right castling
             if move.startRow == 7 and move.startCol == 4 and move.endRow == 7 and \
                     move.endCol == 6 and not self.whiteRightRockMoved and \
-                    self.board[7][5] == "--" and self.board[7][6] == "--":
+                    self.board[7][5] == "--" and self.board[7][6] == "--" and \
+                    self.noThreatOnCastling([(7, 4), (7, 5), (7, 6)]):
                 self.board[7][4] = "--"
                 self.board[7][5] = "wR"
                 self.board[7][6] = "wK"
@@ -485,7 +486,8 @@ class GameState():
             if move.startRow == 7 and move.startCol == 4 and move.endRow == 7 and \
                     move.endCol == 2 and not self.whiteLeftRockMoved and \
                     self.board[7][1] == "--" and self.board[7][2] == "--" and \
-                    self.board[7][3] == "--":
+                    self.board[7][3] == "--" and \
+                    self.noThreatOnCastling([(7, 1), (7, 2), (7, 3), (7, 4)]):
                 self.board[7][0] = "--"
                 self.board[7][2] = "wK"
                 self.board[7][3] = "wR"
@@ -498,7 +500,8 @@ class GameState():
             # check black right castling
             if move.startRow == 0 and move.startCol == 4 and move.endRow == 0 and \
                     move.endCol == 6 and not self.blackRightRockMoved and \
-                    self.board[0][5] == "--" and self.board[0][6] == "--":
+                    self.board[0][5] == "--" and self.board[0][6] == "--"\
+                    and self.noThreatOnCastling([(0, 4), (0, 5), (0, 6)]):
                 self.board[0][4] = "--"
                 self.board[0][5] = "bR"
                 self.board[0][6] = "bK"
@@ -510,13 +513,22 @@ class GameState():
             if move.startRow == 0 and move.startCol == 4 and move.endRow == 0 and \
                     move.endCol == 2 and not self.blackLeftRockMoved and \
                     self.board[0][1] == "--" and self.board[0][2] == "--" and \
-                    self.board[0][3] == "--":
+                    self.board[0][3] == "--" and \
+                    self.noThreatOnCastling([(0, 1), (0, 2), (0, 3), (0, 4)]):
                 self.board[0][0] = "--"
                 self.board[0][2] = "bK"
                 self.board[0][3] = "bR"
                 self.board[0][4] = "--"
                 self.blackKingMoved = True
                 return True
+
+    def noThreatOnCastling(self, list_of_squares):
+        oppositeMoves = self.getOppositePossibleMoves()
+        for move in oppositeMoves:
+            for square in list_of_squares:
+                if square[0] == move.endRow and square[1] == move.endCol:
+                    return False
+        return True
 
     # if king moves, check if the move is legal
     def removeIllegalKingMoves(self, moves, opposite_moves):
@@ -849,7 +861,7 @@ class GameState():
         new_piece = "0"
         for i in range(len(self.board)):
             if self.board[0][i] == "wP":
-                self.loadBlackPromotion()
+                self.loadWhitePromotion()
                 while new_piece == "0":
                     for event in pygame.event.get():
                         # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:

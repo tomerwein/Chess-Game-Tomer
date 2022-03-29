@@ -1,7 +1,7 @@
 import pygame
 from constants import *
 import ChessEngine
-from Button import *
+from MenuButton import *
 from helper import screen
 
 def loadImages():
@@ -48,12 +48,12 @@ def main_menu():
         MENU_TEXT = get_font(40).render("MAIN MENU", True, "#b68f40")
         MENU_RECT = MENU_TEXT.get_rect(center=(260, 100))
 
-        PLAY_BUTTON = Button(image=rect, pos=(260, 200),
-                             text_input="PLAY",font=get_font(30), base_color="slate blue", hovering_color="Purple")
-        OPTIONS_BUTTON = Button(image=rect, pos=(260, 300),
-                                text_input="OPTIONS", font=get_font(30), base_color="slate blue", hovering_color="Purple")
-        QUIT_BUTTON = Button(image=rect, pos=(260, 400),
-                             text_input="QUIT", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+        PLAY_BUTTON = MenuButton(image=rect, pos=(260, 200),
+                                 text_input="PLAY", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+        OPTIONS_BUTTON = MenuButton(image=rect, pos=(260, 300),
+                                    text_input="OPTIONS", font=get_font(30), base_color="slate blue", hovering_color="Purple")
+        QUIT_BUTTON = MenuButton(image=rect, pos=(260, 400),
+                                 text_input="QUIT", font=get_font(30), base_color="slate blue", hovering_color="Purple")
 
         screen.blit(MENU_TEXT, MENU_RECT)
 

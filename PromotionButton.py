@@ -1,4 +1,4 @@
-import pygame
+
 
 class PromotionButton:
     def __init__(self, x_pos, y_pos, width, height):

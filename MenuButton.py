@@ -1,7 +1,7 @@
 import pygame
 
 
-class Button:
+class MenuButton:
     def __init__(self, image, pos, text_input, font, base_color, hovering_color):
         self.image = image
         self.image = pygame.transform.scale(self.image, (250, 70))

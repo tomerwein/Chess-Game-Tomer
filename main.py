@@ -32,6 +32,7 @@ def get_font(size):
     return pygame.font.Font("Images/menu/MorningRainbow.ttf", size)
 
 def main_menu():
+    # main menu loop
     BG = pygame.image.load("Images/menu/background.jpg")
     BG = pygame.transform.scale(BG, (550, 550))
     rect = pygame.image.load("Images/menu/rect.png")
@@ -72,6 +73,7 @@ def main_menu():
         pygame.display.update()
 
 def game():
+    #  game loop
     squareSelected = () # No square is selected so far (row and a col)
     playerClicks = [] # Move from sqaure 'a' to square 'b'
     clock = pygame.time.Clock()
@@ -143,13 +145,13 @@ def game():
         clock.tick(FPS)
         pygame.display.flip()
 
-# Draw the game state on the boards (Basically the graphics)
 def drawGameState(screen, board):
+    # Draw the game state on the boards (Basically the graphics)
     drawBoard(screen)
     drawPieces(screen, board)
 
-# draw the board
 def drawBoard(screen):
+    # draw the board
     colors = [pygame.Color("white"), pygame.Color("skyblue")]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -159,13 +161,12 @@ def drawBoard(screen):
                 color = colors[1]
             pygame.draw.rect(screen, color, pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
-# draw the pieces
 def drawPieces(screen, board):
+    # draw the pieces
     for r in range(len(board)):
         for c in range(len(board)):
             if board[r][c] in IMAGES:
                 screen.blit(IMAGES[board[r][c]], pygame.Rect(c*SQ_SIZE-2, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
-
 
 DIMENSION, HEIGHT = 8, 512  
 SQ_SIZE = HEIGHT // DIMENSION

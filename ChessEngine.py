@@ -375,10 +375,13 @@ class GameState():
                 self.board[0][2], self.board[0][3] = "bK", "bR"
                 self.board[0][0], self.board[0][4] = "--", "--"
 
-            # if redo move isn't castling
+            # check if redo move isn't castling
             else:
+                # check if en passant move been made
                 if move[2]:
                     self.board[move[0].startRow][move[0].endCol] = "--"
+
+                # check if promotion move been made
                 elif move[3] != "0":
                     if self.whiteToMove:
                         if move[3] == "1":
@@ -407,6 +410,7 @@ class GameState():
                     self.countTurns += 1
 
     def checkPossibleColor(self, move):
+        # check if the right color been moved
         if self.whiteToMove and self.board[move.startRow][move.startCol][0] == 'w':
             return True
         if not self.whiteToMove and self.board[move.startRow][move.startCol][0] == 'b':
@@ -414,13 +418,14 @@ class GameState():
         return False
 
     def getOppositePossibleMoves(self):
+        # get all opposite player moves
         self.whiteToMove = not self.whiteToMove  # swap players move
         oppositeMoves = self.getPossibleMoves()
         self.whiteToMove = not self.whiteToMove  # swap players move
         return oppositeMoves
 
-    # get all possible moves in a list
     def getPossibleMoves(self):
+        # get all possible moves in a list
         possibleMoves = []
         if self.whiteToMove:
             for r in range(len(self.board)):
@@ -460,8 +465,9 @@ class GameState():
 
         return possibleMoves
 
-    # check if the move is castling and if it's legal
     def castling(self, move):
+        # check if the move is castling and if it's legal
+
         # check if the white king has moved
         if not self.whiteKingMoved:
             # check white right castling
@@ -517,6 +523,7 @@ class GameState():
                 return True
 
     def noThreatOnCastling(self, list_of_squares):
+        # check if there is any threat on the routh of castling
         oppositeMoves = self.getOppositePossibleMoves()
         for move in oppositeMoves:
             for square in list_of_squares:
@@ -524,22 +531,21 @@ class GameState():
                     return False
         return True
 
-    # if king moves, check if the move is legal
     def removeIllegalKingMoves(self, moves, opposite_moves):
+        # if king moves, check if the move is legal
         illegalIndexesList = []
         for move in moves:
             if self.board[move.startRow][move.startCol][1] == "K" and \
                     self.checkIfKingMovellegal(move.endRow, move.endCol, opposite_moves):
                 illegalIndexesList.append(move)
 
-        # print(illegalIndexesList)
-        # print("len before" + str(len((moves))))
         for illegalMove in illegalIndexesList:
             moves.remove(illegalMove)
-        # print("len after" + str(len(moves)))
 
     def checkIfKingMovellegal(self, r, c, opposite_moves):
-        # Check if there is a pawn that threat that square
+        # Check if there is any piece that threat that square
+
+        # check if there is a pawn move that threat that square
         if self.whiteToMove:
             opponent_color = "b"
         else:
@@ -559,7 +565,7 @@ class GameState():
             elif r - 1 > 0 and c - 1 >= 0 and self.board[r - 1][c - 1] == "bP":
                 return True
 
-        # Check if there is an opponent move that hits the king's square
+        # Check if there is an opponent move that threat the king's square
         for checkMove in opposite_moves:
             if checkMove.endRow == r and \
                     checkMove.endCol == c and \
@@ -569,6 +575,7 @@ class GameState():
         return False
 
     def isProtected(self, move):
+        # check if a piece that being threatened check-mate is protected
         protected = False
         pieceChecked = self.board[move.endRow][move.endCol]
         startPiece = self.board[move.startRow][move.startCol]
@@ -580,8 +587,6 @@ class GameState():
 
         self.board[move.startRow][move.startCol] = startPiece
         self.board[move.endRow][move.endCol] = pieceChecked
-
-        print("the piece is protected? " + str(protected))
 
         return protected
 
@@ -852,16 +857,13 @@ class GameState():
                 moves.append(Move((r, c), (r + 1, c + 1)))
 
     def promotion(self):
+        # check if a promotion move been made
         new_piece = "0"
         for i in range(len(self.board)):
             if self.board[0][i] == "wP":
                 self.loadWhitePromotion()
                 while new_piece == "0":
                     for event in pygame.event.get():
-                        # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
-                        #     button.changeColor(event.pos)
-                        #     button.update(screen)
-
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             if mouse_in_button(whiteQueen, event.pos):
                                 new_piece = "1"
@@ -888,10 +890,6 @@ class GameState():
                 self.loadBlackPromotion()
                 while new_piece == "0":
                     for event in pygame.event.get():
-                        # for button in [whiteQueen, whiteRock, whiteBishop, whiteKnight]:
-                        #     button.changeColor(event.pos)
-                        #     button.update(screen)
-
                         if event.type == pygame.MOUSEBUTTONDOWN:
                             if mouse_in_button(blackQueen, event.pos):
                                 new_piece = "1"
@@ -920,6 +918,7 @@ class GameState():
         return self.status
 
     def loadWhitePromotion(self):
+        # load white promotion images
         promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
         imageWQ = pygame.transform.scale(pygame.image.load("Images/promotion/wQ.png"), (80, 80))
         imageWR = pygame.transform.scale(pygame.image.load("Images/promotion/wR.png"), (80, 80))
@@ -934,6 +933,7 @@ class GameState():
         pygame.display.flip()
 
     def loadBlackPromotion(self):
+        # load black promotion images
         promotion = pygame.transform.scale(pygame.image.load("Images/promotion/square.png"), (320, 80))
         imageBQ = pygame.transform.scale(pygame.image.load("Images/promotion/bQ.png"), (80, 80))
         imageBR = pygame.transform.scale(pygame.image.load("Images/promotion/bR.png"), (80, 80))
